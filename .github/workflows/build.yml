@@ -113,6 +113,8 @@ jobs:
               -DEXAMPLE_TESTS=ON \
               .
             fi
+
+            echo "$RUNNER_OS"
             #cmake \
             #  -B ./build \
             #  -G "${{ matrix.generator }}" \
@@ -127,9 +129,9 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            cmake --build ./build --target INSTALL --config MinSizeRel
+            cmake --build ./build --config MinSizeRel
           else
-            cmake --build ./build --target install --config MinSizeRel
+            cmake --build ./build --config MinSizeRel
           fi
 
       #- name: Tests
