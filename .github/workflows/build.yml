@@ -166,29 +166,29 @@ jobs:
           name: Release
           path: release
 
-      #- name: Create Changelog
-      #  id: create_changelog
-      #  if: startsWith(github.ref, 'refs/tags/v')
-      #  shell: bash
-      #  run: |
-      #    last_tag=$(git describe --tags --abbrev=0 @^ || true)
-      #    if [ -z "$last_tag" ]; then
-      #      git log --oneline --format="%C(auto) %h %s" > changelog.txt
-      #    else
-      #      git log --oneline --format="%C(auto) %h %s" ${last_tag}..@ > changelog.txt
-      #    fi
-      #    cat changelog.txt
+      - name: Create Changelog
+        id: create_changelog
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: bash
+        run: |
+          last_tag=$(git describe --tags --abbrev=0 @^ || true)
+          if [ -z "$last_tag" ]; then
+            git log --oneline --format="%C(auto) %h %s" > changelog.txt
+          else
+            git log --oneline --format="%C(auto) %h %s" ${last_tag}..@ > changelog.txt
+          fi
+          cat changelog.txt
 
-      #- name: Release
-      #  uses: ncipollo/release-action@v1
-      #  if: startsWith(github.ref, 'refs/tags/v')
-      #  with:
-      #    artifacts: ${{ steps.create_artifact.outputs.path }}
-      #    allowUpdates: true
-      #    artifactContentType: application/zip
-      #    bodyFile: changelog.txt
-      #    draft: false
-      #    omitBodyDuringUpdate: true
-      #    omitNameDuringUpdate: true
-      #    prerelease: false
-      #    token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Release
+        uses: ncipollo/release-action@v1
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          artifacts: ${{ steps.create_artifact.outputs.path }}
+          allowUpdates: true
+          artifactContentType: application/zip
+          bodyFile: changelog.txt
+          draft: false
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: false
+          token: ${{ secrets.ACCOUNT_PAT }}
