@@ -14,6 +14,9 @@ project ("wxWidgetsTest")
 The story is something like: 
 * The CMake-bundled "find-wxWidget"-function does not work with CMake older than 3.24
 * Therefore, we bring our own FindwxWidget-script in this repository
+
+sudo apt install libwxgtk3.0-gtk3-dev
+
 ]]#
 
 
