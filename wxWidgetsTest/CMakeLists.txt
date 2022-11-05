@@ -8,7 +8,7 @@ add_executable (wxWidgetsTest WIN32 "wxWidgetsTest.cpp" "wxWidgetsTest.h" "compr
 
  #target_link_libraries(wxWidgetsTest PRIVATE wx::core wx::base)
  target_link_libraries(wxWidgetsTest PRIVATE ${wxWidgets_LIBRARIES})
- #target_include_directories(wxWidgetsTest )
+ #target_include_directories(wxWidgetsTest PRIVATE ${wxWidgets_INCLUDE_DIRS})
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET wxWidgetsTest PROPERTY CXX_STANDARD 20)

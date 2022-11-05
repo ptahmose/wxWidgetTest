@@ -24,7 +24,7 @@ message("wxWidgets_LIBRARY_DIRS    : ${wxWidgets_LIBRARY_DIRS}")
 message("wxWidgets_LIBRARIES       : ${wxWidgets_LIBRARIES}")
 message("wxWidgets_CXX_FLAGS       : ${wxWidgets_CXX_FLAGS}")
 message("wxWidgets_USE_FILE        : ${wxWidgets_USE_FILE}")
-#include(${wxWidgets_USE_FILE})
+include(${wxWidgets_USE_FILE})
 
 # Include sub-projects.
 add_subdirectory ("wxWidgetsTest")
