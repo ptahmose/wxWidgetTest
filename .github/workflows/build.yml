@@ -20,7 +20,8 @@ jobs:
         include:
           - name: 'Windows x64'
             os: windows-latest
-            triplet: x64-windows-static
+            #triplet: x64-windows-static  <-- does not work :-(
+            triplet: x64-windows
             vcpkg_dir: 'C:/vcpkg'
             suffix: 'windows-win64'
             generator: 'Visual Studio 17 2022'
