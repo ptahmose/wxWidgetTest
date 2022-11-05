@@ -78,7 +78,7 @@ jobs:
       - name: Install vcpkg packages
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "$RUNNER_OS" == "Windows" || "$RUNNER_OS" == "macOS" ]; then
             vcpkg install --triplet ${{ matrix.triplet }} $(cat vcpkg.txt)
           else
             if [ "$RUNNER_OS" == "Linux" ]; then
@@ -91,7 +91,7 @@ jobs:
         run: |
           mkdir build
           mkdir install
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if [ "$RUNNER_OS" == "Windows" || "$RUNNER_OS" == "macOS" ]; then
             cmake \
               -B ./build \
               -G "${{ matrix.generator }}" ${{ matrix.arch }} \
@@ -128,24 +128,20 @@ jobs:
       - name: Compile
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            cmake --build ./build --config MinSizeRel
-          else
-            cmake --build ./build --config MinSizeRel
-          fi
+          cmake --build ./build --config MinSizeRel
 
       #- name: Tests
       #  shell: bash
       #  run: cd build && ctest -C MinSizeRel --verbose
 
-      - name: List runtime dependencies
-        shell: bash
-        run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-            ldd ./install/bin/example
-          elif [ "$RUNNER_OS" == "macOS" ]; then
-            otool -L ./install/bin/example
-          fi
+      #- name: List runtime dependencies
+      #  shell: bash
+      #  run: |
+      #    if [ "$RUNNER_OS" == "Linux" ]; then
+      #      ldd ./install/bin/example
+      #    elif [ "$RUNNER_OS" == "macOS" ]; then
+      #      otool -L ./install/bin/example
+      #    fi
 
       #- name: Package
       #  id: create_artifact
