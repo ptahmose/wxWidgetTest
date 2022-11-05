@@ -92,12 +92,12 @@ jobs:
           mkdir build
           mkdir install
           if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
+            ls ${{ matrix.vcpkg_dir }}/scripts/buildsystems/
+            echo ${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake
             cmake \
               -B ./build \
               -G "${{ matrix.generator }}" ${{ matrix.arch }} \
-              -DCMAKE_INSTALL_PREFIX=./install \
               -DCMAKE_BUILD_TYPE=MinSizeRel \
-              -DEXAMPLE_TESTS=ON \
               -DCMAKE_TOOLCHAIN_FILE=${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake \
               .
           else
@@ -108,9 +108,7 @@ jobs:
                cmake \
               -B ./build \
               -G "${{ matrix.generator }}" \
-              -DCMAKE_INSTALL_PREFIX=./install \
               -DCMAKE_BUILD_TYPE=MinSizeRel \
-              -DEXAMPLE_TESTS=ON \
               .
             fi
 
