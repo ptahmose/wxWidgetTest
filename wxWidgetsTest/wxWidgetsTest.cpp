@@ -160,8 +160,8 @@ private:
         DoOperation::Parameters parameters;
 
         // Note: for dealing with Unicode -> https://docs.wxwidgets.org/trunk/overview_unicode.html
-        parameters.source_folder = this->source_folder_ctrl_->GetValue().utf8_string();
-        parameters.destination_folder = this->destination_folder_ctrl_->GetValue().utf8_string();
+        parameters.source_folder = this->source_folder_ctrl_->GetValue().utf8_str();
+        parameters.destination_folder = this->destination_folder_ctrl_->GetValue().utf8_str();
         parameters.compression_options = this->GetCompressionOptions();
         parameters.report_progress_functor = [this](const DoOperation::ProgressInformation& information)->void {this->ProgressEvent(information); };
         this->operation_.Start(parameters);
@@ -194,7 +194,7 @@ private:
 
     void ChooseFolderHandler(wxTextCtrl* text_control)
     {
-        wxWindowPtr<DirDialog> folderBrowserDialog(new DirDialog(this, wxEmptyString));
+        wxWindowPtr<wxDirDialog> folderBrowserDialog(new wxDirDialog(this, wxEmptyString));
         if (text_control->GetValue().IsEmpty())
         {
             folderBrowserDialog->SetPath(wxStandardPaths::Get().GetDocumentsDir());
