@@ -78,7 +78,7 @@ jobs:
       - name: Install vcpkg packages
         shell: bash
         run: |
-          if [ "$RUNNER_OS" == "Windows" || "$RUNNER_OS" == "macOS" ]; then
+          if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
             vcpkg install --triplet ${{ matrix.triplet }} $(cat vcpkg.txt)
           else
             if [ "$RUNNER_OS" == "Linux" ]; then
@@ -91,7 +91,7 @@ jobs:
         run: |
           mkdir build
           mkdir install
-          if [ "$RUNNER_OS" == "Windows" || "$RUNNER_OS" == "macOS" ]; then
+          if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
             cmake \
               -B ./build \
               -G "${{ matrix.generator }}" ${{ matrix.arch }} \
