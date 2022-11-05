@@ -157,8 +157,10 @@ jobs:
           fi
           name=wxWidgetsTest-${{ matrix.suffix }}-$(git describe --always).zip
           mv -v ./wxWidgetsTest.zip release/${name}
-          echo "::set-output name=name::${name}"
-          echo "::set-output name=path::release/${name}"
+          #echo "::set-output name=name::${name}"
+          echo "{name}={${name}}" >> $GITHUB_OUTPUT
+          #echo "::set-output name=path::release/${name}"
+          echo "{path}={release/${name}}" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
