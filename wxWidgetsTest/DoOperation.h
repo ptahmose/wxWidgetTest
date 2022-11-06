@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <thread>
+#include <atomic>
 
 #include "compressionOptions.h"
 #include "FileEnumerator.h"
