@@ -28,8 +28,20 @@ public:
 
     /// If the iterator is not pointing to a "regular file", the iterator will be incremented
     /// until it points to a "regular file" or the enumeration is ended.
+    ///
+    /// \typeparam  t   Generic type parameter (expecting filesystem::directory_iterator or filesystem::recursive_directory_iterator here).
     /// \param [in,out] it  The iterator.
-    static void IterateIfNecessaryEnsureRegularFile(std::filesystem::directory_iterator& it);
+    template <typename t>
+    static void IterateIfNecessaryEnsureRegularFile(t& it)
+    {
+        while (it != t{})
+        {
+            if (it->is_regular_file())
+            {
+                break;
+            }
 
-    static void IterateIfNecessaryEnsureRegularFile(std::filesystem::recursive_directory_iterator& it);
+            ++it;
+        }
+    }
 };

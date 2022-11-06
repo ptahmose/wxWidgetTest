@@ -68,29 +68,3 @@ bool FileEnumerator::GetNext(Item& item)
         return true;
     }
 }
-
-void FileEnumerator::IterateIfNecessaryEnsureRegularFile(std::filesystem::directory_iterator& it)
-{
-    while (it != filesystem::directory_iterator())
-    {
-        if (it->is_regular_file())
-        {
-            break;
-        }
-
-        ++it;
-    }
-}
-
-void FileEnumerator::IterateIfNecessaryEnsureRegularFile(std::filesystem::recursive_directory_iterator& it)
-{
-    while (it != filesystem::recursive_directory_iterator())
-    {
-        if (it->is_regular_file())
-        {
-            break;
-        }
-
-        ++it;
-    }
-}
