@@ -9,6 +9,11 @@ FileEnumerator::FileEnumerator()
 
 void FileEnumerator::SetFolder(const std::wstring& folder_name, bool recursive)
 {
+    if (this->is_initialized_)
+    {
+        throw logic_error("Instance is already initialized.");
+    }
+
     const filesystem::path path{ folder_name };
 
     if (!recursive)
@@ -30,12 +35,19 @@ void FileEnumerator::SetFolder(const std::wstring& folder_name, bool recursive)
         this->current_recursive_directory_iterator_ = iterator;
     }
 
-    this->is_recursive_mode = recursive;
+    this->is_recursive_mode_ = recursive;
+
+    this->is_initialized_ = true;
 }
 
 bool FileEnumerator::GetNext(Item& item)
 {
-    if (!this->is_recursive_mode)
+    if (!this->is_initialized_)
+    {
+        throw logic_error("Instance is not initialized.");
+    }
+
+    if (!this->is_recursive_mode_)
     {
         // c.f. https://en.cppreference.com/w/cpp/filesystem/directory_iterator
         // -> a default constructed iterator is marks the end of the enumeration
