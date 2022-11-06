@@ -29,7 +29,10 @@ void DoOperation::Start(const Parameters& parameters)
     this->file_enumerator_->SetFolder(convertUtf8ToWide(parameters.source_folder), parameters.recursive_folder_traversal);
 
     this->cancellation_requested_.store(false);
+    this->total_number_of_files_processed_ = 0;
+    this->total_sum_of_filesizes_of_files_processed_ = 0;
     this->parameters_ = parameters;
+
     this->worker_thread_ = std::thread([this] {this->RunOperation(); });
 }
 
