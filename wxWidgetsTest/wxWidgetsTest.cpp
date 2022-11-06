@@ -1,12 +1,16 @@
 ﻿#include <memory>
-#include <wx/dirdlg.h>
+#include <iomanip>
+#include <sstream>
 
+#include <wx/dirdlg.h>
 #include "wxWidgetsTest.h"
 #include "wxProgressInfoClientData.h"
 #include "compressionOptions.h"
 #include "DoOperation.h"
 
 using namespace std;
+
+std::locale Frame::kFormatting_locale = locale("en_US.UTF-8");
 
 Frame::Frame() : wxFrame(nullptr, wxID_ANY, "wxWidget Demo")
 {
@@ -15,10 +19,7 @@ Frame::Frame() : wxFrame(nullptr, wxID_ANY, "wxWidget Demo")
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     p->SetSizer(topsizer);
 
-    wxFlexGridSizer* flexGridsizer = new wxFlexGridSizer(
-        3, // columns
-        5, // vertical gap
-        5);// horizontal gap
+    wxFlexGridSizer* flexGridsizer = new wxFlexGridSizer(/*columns*/3, /*vertical gap*/5, /*horizontal gap*/5);
     flexGridsizer->SetFlexibleDirection(wxHORIZONTAL);
     flexGridsizer->SetNonFlexibleGrowMode(wxFLEX_GROWMODE_NONE);
     flexGridsizer->AddGrowableCol(1);
@@ -39,15 +40,13 @@ Frame::Frame() : wxFrame(nullptr, wxID_ANY, "wxWidget Demo")
     optionsGridsizer->Add(new wxStaticText(p, wxID_ANY, "recursive:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
     this->options_recursive_ctrl_ = new wxCheckBox(p, wxID_ANY, "");
     optionsGridsizer->Add(this->options_recursive_ctrl_);
-    optionsGridsizer->Add(new wxStaticText(p, wxID_ANY, "What to compress:"),
-        wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    optionsGridsizer->Add(new wxStaticText(p, wxID_ANY, "What to compress:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+
     wxArrayString items;
     items.Add(GetDisplayText(CompressionOptions::WhatToCompress::kOnlyUncompressed));
     items.Add(GetDisplayText(CompressionOptions::WhatToCompress::kUncompressedAndZstd));
     items.Add(GetDisplayText(CompressionOptions::WhatToCompress::kUncompressedAndZstdAndJpgxr));
-    this->options_what_to_compress_ctrl_ = new wxComboBox(p, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-        items,
-        wxCB_READONLY | wxCB_DROPDOWN);
+    this->options_what_to_compress_ctrl_ = new wxComboBox(p, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, items, wxCB_READONLY | wxCB_DROPDOWN);
     this->options_what_to_compress_ctrl_->SetSelection(0);
     optionsGridsizer->Add(this->options_what_to_compress_ctrl_, wxSizerFlags(1).Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
     optionsGridsizer->Add(new wxStaticText(p, wxID_ANY, "compression level:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
@@ -59,24 +58,29 @@ Frame::Frame() : wxFrame(nullptr, wxID_ANY, "wxWidget Demo")
     topsizer->Add(statsizer, wxSizerFlags().Expand().Border(wxALL, 10));
 
     wxBoxSizer* button_box = new wxBoxSizer(wxHORIZONTAL);
-    button_box->Add(new wxButton(p, Ids::StartButton, "Start"), wxSizerFlags().Border(wxALL, 7));
+    this->start_button_ctrl_ = new wxButton(p, Ids::StartButton, "Start");
+    button_box->Add(this->start_button_ctrl_, wxSizerFlags().Border(wxALL, 7));
+    this->stop_button_ctrl_ = new wxButton(p, Ids::StopButton, "Stop");
+    button_box->Add(this->stop_button_ctrl_, wxSizerFlags().Border(wxALL, 7));
     topsizer->Add(button_box, wxSizerFlags().Center());
 
     wxFlexGridSizer* statisticsGridsizer = new wxFlexGridSizer(4, 5, 5);
     statisticsGridsizer->Add(new wxStaticText(p, wxID_ANY, "files processed:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
-    statisticsGridsizer->Add(new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY), wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
-    statisticsGridsizer->Add(new wxStaticText(p, wxID_ANY, "data size reduced by:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
-    statisticsGridsizer->Add(new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY), wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    this->statistics_files_processed_ctrl_ = new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY);
+    statisticsGridsizer->Add(this->statistics_files_processed_ctrl_, wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    statisticsGridsizer->Add(new wxStaticText(p, wxID_ANY, "original total file size:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    this->statistics_total_original_filesize_ctrl_ = new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY);
+    statisticsGridsizer->Add(this->statistics_total_original_filesize_ctrl_, wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    statisticsGridsizer->Add(new wxStaticText(p, wxID_ANY, "compressed total file size:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
+    this->statistics_total_compressed_filesize_ctrl_ = new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY);
+    statisticsGridsizer->Add(this->statistics_total_compressed_filesize_ctrl_, wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
     topsizer->Add(statisticsGridsizer, wxSizerFlags().Center().Border(wxALL, 10));
 
-    topsizer->Add(
-        new wxStaticLine(p, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxHORIZONTAL),
-        wxSizerFlags().Proportion(0).Expand());
-
+    topsizer->Add(new wxStaticLine(p, wxID_ANY, wxDefaultPosition, wxSize(3, 3), wxHORIZONTAL), wxSizerFlags().Proportion(0).Expand());
     this->log_text_ctrl_ = new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxSize(100, 60), wxTE_MULTILINE | wxTE_READONLY);
-    topsizer->Add(
-        log_text_ctrl_,
-        wxSizerFlags(1).Expand().Proportion(1).Border(wxALL, 5).Align(wxALIGN_TOP));
+    topsizer->Add(this->log_text_ctrl_, wxSizerFlags(1).Expand().Proportion(1).Border(wxALL, 5).Align(wxALIGN_TOP));
+
+    this->UpdateState(false);
 
     // don't allow frame to get smaller than what the sizers tell it and also set
     // the initial size as calculated by the sizers
@@ -119,6 +123,18 @@ void Frame::OnStartButton(wxCommandEvent& event)
     parameters.compression_options = this->GetCompressionOptions();
     parameters.report_progress_functor = [this](const DoOperation::ProgressInformation& information)->void {this->ProgressEvent(information); };
     this->operation_.Start(parameters);
+    this->UpdateState(true);
+}
+
+void Frame::OnStopButton(wxCommandEvent& event)
+{
+    this->operation_.RequestCancel();
+}
+
+void Frame::UpdateState(bool operation_ongoing)
+{
+    this->start_button_ctrl_->Enable(!operation_ongoing);
+    this->stop_button_ctrl_->Enable(operation_ongoing);
 }
 
 void Frame::ProgressEvent(const DoOperation::ProgressInformation& information)
@@ -137,7 +153,7 @@ void Frame::ProgressEvent(const DoOperation::ProgressInformation& information)
 void Frame::OnProgressEvent(wxCommandEvent& event)
 {
     // get the number sent along with the event and use it to update the GUI
-    wxProgressInfoClientData* progress_info_client_data = dynamic_cast<wxProgressInfoClientData*>(event.GetClientObject());
+    const wxProgressInfoClientData* progress_info_client_data = dynamic_cast<wxProgressInfoClientData*>(event.GetClientObject());
 
     const auto& progress_info = progress_info_client_data->GetProgressInformation();
 
@@ -146,19 +162,34 @@ void Frame::OnProgressEvent(wxCommandEvent& event)
         if (progress_info.remove_characters_before_adding_message > 0)
         {
             const auto lastPosition = this->log_text_ctrl_->GetLastPosition();
-            const wxTextPos startPosition = progress_info.remove_characters_before_adding_message < static_cast<wxTextPos>(lastPosition) ?
-                                            (lastPosition - progress_info.remove_characters_before_adding_message) : 0;
+            const wxTextPos startPosition = static_cast<wxTextPos>(progress_info.remove_characters_before_adding_message) < lastPosition ?
+                (lastPosition - static_cast<wxTextPos>(progress_info.remove_characters_before_adding_message)) : 0;
             this->log_text_ctrl_->Remove(startPosition, lastPosition);
         }
 
         this->log_text_ctrl_->AppendText(progress_info.message);
     }
 
-    //if (progress_info.)
+    Frame::SetNumericValueInCtrl(progress_info.no_of_files_processed_valid, progress_info.no_of_files_processed, this->statistics_files_processed_ctrl_);
+    Frame::SetNumericValueInCtrl(progress_info.data_size_of_files_processed_before_compression_valid, progress_info.data_size_of_files_before_compression_processed, this->statistics_total_original_filesize_ctrl_);
+    Frame::SetNumericValueInCtrl(progress_info.data_size_of_files_processed_after_compression_valid, progress_info.data_size_of_files_processed_after_compression, this->statistics_total_compressed_filesize_ctrl_);
+
+    this->UpdateState(progress_info.operation_ongoing);
 
     // this is quite fishy, see comment when adding the event
     event.SetClientObject(nullptr);
     delete progress_info_client_data;
+}
+
+/*static*/void Frame::SetNumericValueInCtrl(bool valid, std::uint64_t value, wxTextCtrl* text_control)
+{
+    if (valid == true)
+    {
+        ostringstream ss;
+        ss.imbue(Frame::kFormatting_locale);
+        ss << value;
+        text_control->SetValue(ss.str());
+    }
 }
 
 void Frame::OnChooseSourceFolderButton(wxCommandEvent& event)
@@ -193,6 +224,7 @@ void Frame::ChooseFolderHandler(wxTextCtrl* text_control)
                 text_control->AppendText(folderBrowserDialog->GetPath());
             }
         });
+
     folderBrowserDialog->ShowWindowModal();
 }
 
@@ -200,6 +232,7 @@ wxBEGIN_EVENT_TABLE(Frame, wxFrame)
 EVT_BUTTON(Frame::Ids::ChooseSourceFolderButton, Frame::OnChooseSourceFolderButton)
 EVT_BUTTON(Frame::Ids::ChooseDestinationFolderButton, Frame::OnChooseDestinationFolderButton)
 EVT_BUTTON(Frame::Ids::StartButton, Frame::OnStartButton)
+EVT_BUTTON(Frame::Ids::StopButton, Frame::OnStopButton)
 EVT_COMMAND(Frame::PROGRESS_EVENT_ID, wxEVT_PROGRESS_EVENT, Frame::OnProgressEvent)
 wxEND_EVENT_TABLE()
 
