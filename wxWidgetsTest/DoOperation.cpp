@@ -19,7 +19,7 @@ DoOperation::~DoOperation()
 
 void DoOperation::Start(const Parameters& parameters)
 {
-    this->file_enumerator_.SetFolder(convertUtf8ToWide(parameters.source_folder), false);
+    this->file_enumerator_.SetFolder(convertUtf8ToWide(parameters.source_folder), parameters.recursive_folder_traversal);
 
     this->parameters_ = parameters;
     this->worker_thread_ = std::thread([this] {this->RunOperation(); });
@@ -48,15 +48,5 @@ void DoOperation::RunOperation()
         this->parameters_.report_progress_functor(progress_information);
     }
 
-    //for (int i = 0; i < 100; ++i)
-    //{
-    //    this_thread::sleep_for(std::chrono::milliseconds(500));
-
-    //    ostringstream ss;
-    //    ss << "Message #" << i << endl;
-
-    //    ProgressInformation progress_information;
-    //    progress_information.message = ss.str();
-    //    this->parameters_.report_progress_functor(progress_information);
-    //}
+  
 }

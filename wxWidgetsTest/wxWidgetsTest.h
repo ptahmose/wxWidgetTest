@@ -26,6 +26,7 @@ private:
 
     wxTextCtrl* source_folder_ctrl_;
     wxTextCtrl* destination_folder_ctrl_;
+    wxCheckBox* options_recursive_ctrl_;
     wxComboBox* options_what_to_compress_ctrl_;
     wxSpinCtrl* options_compression_level_ctrl_;
     wxTextCtrl* statistics_files_processed_ctrl_;

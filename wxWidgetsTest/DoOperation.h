@@ -29,6 +29,7 @@ public:
 
     struct Parameters
     {
+        bool recursive_folder_traversal{ false };
         std::string source_folder;
         std::string destination_folder;
         CompressionOptions compression_options;
