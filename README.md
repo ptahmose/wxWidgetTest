@@ -1,4 +1,4 @@
-# libCZIrw
+# wxWidgetTest
 ***A finger-exercise with wxWidget and cross-platform UI (in C++)***
 --------------------------------------------------------------
 
