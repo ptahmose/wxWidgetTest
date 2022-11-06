@@ -3,16 +3,8 @@
 
 using namespace std;
 
-  // Use explicit instantiations of these types. Any inconsistency in the
-  // value of __default_lock_policy between code including this header and
-  // the library will cause a linker error.
-//   extern template class
-//     std::__shared_ptr<std::filesystem::_Dir>;
-
-
 FileEnumerator::FileEnumerator()
 {
-    
 }
 
 void FileEnumerator::SetFolder(const std::wstring& folder_name, bool recursive)
