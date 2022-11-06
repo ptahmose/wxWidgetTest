@@ -34,8 +34,7 @@ Frame::Frame() : wxFrame(nullptr, wxID_ANY, "wxWidget Demo")
     flexGridsizer->Add(button, wxSizerFlags(1).Align(wxALIGN_CENTER_VERTICAL).Border(wxALL, 1));
     topsizer->Add(flexGridsizer, wxSizerFlags().Proportion(0).Expand().Border(wxALL, 10));
 
-    wxBoxSizer* statsizer = new wxStaticBoxSizer(
-        new wxStaticBox(p, wxID_ANY, "Options"), wxVERTICAL);
+    wxBoxSizer* statsizer = new wxStaticBoxSizer(new wxStaticBox(p, wxID_ANY, "Options"), wxVERTICAL);
     wxFlexGridSizer* optionsGridsizer = new wxFlexGridSizer(2, 5, 5);
     optionsGridsizer->Add(new wxStaticText(p, wxID_ANY, "What to compress:"),
         wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
@@ -62,9 +61,9 @@ Frame::Frame() : wxFrame(nullptr, wxID_ANY, "wxWidget Demo")
 
     wxFlexGridSizer* statisticsGridsizer = new wxFlexGridSizer(4, 5, 5);
     statisticsGridsizer->Add(new wxStaticText(p, wxID_ANY, "files processed:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
-    statisticsGridsizer->Add(new wxTextCtrl(p, wxID_ANY, "235434", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY), wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    statisticsGridsizer->Add(new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY), wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
     statisticsGridsizer->Add(new wxStaticText(p, wxID_ANY, "data size reduced by:"), wxSizerFlags().Align(wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL));
-    statisticsGridsizer->Add(new wxTextCtrl(p, wxID_ANY, "235434", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY), wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
+    statisticsGridsizer->Add(new wxTextCtrl(p, wxID_ANY, "", wxDefaultPosition, wxDefaultSize, wxTE_RIGHT | wxTE_READONLY), wxSizerFlags().Align(wxALIGN_RIGHT | wxALIGN_CENTER_VERTICAL));
     topsizer->Add(statisticsGridsizer, wxSizerFlags().Center().Border(wxALL, 10));
 
     topsizer->Add(
@@ -128,7 +127,6 @@ void Frame::ProgressEvent(const DoOperation::ProgressInformation& information)
 void Frame::OnProgressEvent(wxCommandEvent& event)
 {
     // get the number sent along the event and use it to update the GUI
-    //m_spinner->SetValue(evt.GetInt());
     const auto& progress_info = dynamic_cast<wxProgressInfoClientData*>(event.GetClientObject())->GetProgressInformation();
     this->log_text_ctrl_->AppendText(progress_info.message);
 }
