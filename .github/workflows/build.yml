@@ -141,8 +141,8 @@ jobs:
           fi
           name=wxWidgetsTest-${{ matrix.suffix }}-$(git describe --always).zip
           mv -v ./wxWidgetsTest.zip release/${name}
-          echo "{name}={${name}}" >> $GITHUB_OUTPUT
-          echo "{path}={release/${name}}" >> $GITHUB_OUTPUT
+          echo "name=${name}" >> $GITHUB_OUTPUT
+          echo "path=release/${name}" >> $GITHUB_OUTPUT
 
       # upload the build-results to artifacts-store
       - name: Upload artifacts
