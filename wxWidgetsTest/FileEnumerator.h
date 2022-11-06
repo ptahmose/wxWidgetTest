@@ -7,7 +7,6 @@
 class FileEnumerator
 {
 private:
-    std::unique_ptr<std::filesystem::directory_iterator> directory_enumerator_;
     std::filesystem::directory_iterator current_iterator_;
 public:
     struct Item
@@ -24,4 +23,6 @@ public:
     void SetFolder(const std::wstring& folder_name, bool recursive);
 
     bool GetNext(Item& item);
+
+    static void IterateUntilNextFile(std::filesystem::directory_iterator& it);
 };

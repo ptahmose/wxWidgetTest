@@ -17,7 +17,9 @@ add_executable (wxWidgetsTest WIN32
   "utilities.h" 
   "utilities.cpp")
 
-target_link_libraries(wxWidgetsTest PRIVATE ${wxWidgets_LIBRARIES})
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(TARGET wxWidgetsTest PROPERTY CXX_STANDARD 17)
+#target_link_libraries(wxWidgetsTest PRIVATE stdc++fs)
+target_link_libraries(wxWidgetsTest PRIVATE  ${wxWidgets_LIBRARIES})
  
 # TODO: Add tests and install targets if needed.
