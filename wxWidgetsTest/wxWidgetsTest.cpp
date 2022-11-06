@@ -126,7 +126,7 @@ void Frame::ProgressEvent(const DoOperation::ProgressInformation& information)
 
 void Frame::OnProgressEvent(wxCommandEvent& event)
 {
-    // get the number sent along the event and use it to update the GUI
+    // get the number sent along with the event and use it to update the GUI
     const auto& progress_info = dynamic_cast<wxProgressInfoClientData*>(event.GetClientObject())->GetProgressInformation();
     this->log_text_ctrl_->AppendText(progress_info.message);
 }

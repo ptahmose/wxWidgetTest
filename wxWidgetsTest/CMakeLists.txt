@@ -11,8 +11,13 @@ add_executable (wxWidgetsTest WIN32
   "DoOperation.h" 
   "DoOperation.cpp"
   "wxProgressInfoClientData.h"
-  "wxProgressInfoClientData.cpp")
+  "wxProgressInfoClientData.cpp" 
+  "FileEnumerator.h" 
+  "FileEnumerator.cpp" 
+  "utilities.h" 
+  "utilities.cpp")
 
-  target_link_libraries(wxWidgetsTest PRIVATE ${wxWidgets_LIBRARIES})
+target_link_libraries(wxWidgetsTest PRIVATE ${wxWidgets_LIBRARIES})
+set_property(TARGET wxWidgetsTest PROPERTY CXX_STANDARD 17)
  
 # TODO: Add tests and install targets if needed.
