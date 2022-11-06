@@ -1,6 +1,6 @@
 # libCZIrw
-*** A finger-exercise with wxWidget and cross-platform UI (in C++) ***
----------------------------------------------------------------------
+***A finger-exercise with wxWidget and cross-platform UI (in C++)***
+--------------------------------------------------------------
 
 ## General Information
  
