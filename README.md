@@ -13,7 +13,7 @@ The repo contains a [GitHub Workflow](https://docs.github.com/en/actions/using-w
 ## Building
 
 For Windows, the recommended approach is to use [vcpkg](https://github.com/microsoft/vcpkg). 
-In order to prepare wxWiget, this command should do the job
+In order to prepare [wxWigets](https://www.wxwidgets.org/), this command should do the job
 
 ```
  .\vcpkg.exe install wxwidgets:x64-windows
