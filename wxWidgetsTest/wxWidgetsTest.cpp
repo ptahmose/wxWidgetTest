@@ -7,30 +7,11 @@
 #include <wx/windowptr.h>
 #include <wx/spinctrl.h>
 #include "wxWidgetsTest.h"
+#include "wxProgressInfoClientData.h"
 #include "compressionOptions.h"
 #include "DoOperation.h"
 
 using namespace std;
-
-// Declare a custom event. C.f https://wiki.wxwidgets.org/Inter-Thread_and_Inter-Process_communication#Sending_events_to_the_main_thread_-_wxWidgets_3_only
-DECLARE_EVENT_TYPE(wxEVT_PROGRESS_EVENT, -1)
-
-// Define the custom event.
-DEFINE_EVENT_TYPE(wxEVT_PROGRESS_EVENT)
-
-class wxProgressInfoClientData : public wxClientData
-{
-private:
-    unique_ptr<DoOperation::ProgressInformation> progress_information_;
-public:
-    wxProgressInfoClientData(const DoOperation::ProgressInformation& progress_information)
-    {
-        this->progress_information_ = make_unique<DoOperation::ProgressInformation>(progress_information);
-    }
-
-    const DoOperation::ProgressInformation& GetProgressInformation() const { return *this->progress_information_.get(); }
-};
-
 
 class Frame : public wxFrame
 {

@@ -27,7 +27,7 @@ jobs:
             generator: 'Visual Studio 17 2022'
             arch: '-A x64'
           #- name: 'Windows x86'
-          #  os: windows-latest-static
+          #  os: windows-latest
           #  triplet: x86-windows
           #  vcpkg_dir: 'C:/vcpkg'
           #  suffix: 'windows-win32'
@@ -54,20 +54,6 @@ jobs:
         with:
           submodules: true
 
-#      # Enable this if you want specific version of vcpkg
-#      # For example tag "2020.06"
-#      - name: Configure Vcpkg
-#        shell: bash
-#        run: |
-#          cd ${{ matrix.vcpkg_dir }}
-#          git fetch origin --tags
-#          git reset --hard 2020.06
-#          if [ "$RUNNER_OS" == "Windows" ]; then
-#            ./bootstrap-vcpkg.bat
-#          else
-#            ./bootstrap-vcpkg.sh
-#          fi
-
       - name: Cache vcpkg
         uses: actions/cache@v3
         with:
@@ -76,13 +62,16 @@ jobs:
           restore-keys: |
             vcpkg-${{ matrix.triplet }}-
 
-      - name: Install vcpkg packages
+      - name: Install dependencies
         shell: bash
         run: |
           if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
+            # on Windows and macOS, we use vcpkg in order to pull in our dependencies,
+            #  note also that the list of packages comes from the file "vcpkg.txt" in the repo
             vcpkg install --triplet ${{ matrix.triplet }} $(cat vcpkg.txt)
           else
             if [ "$RUNNER_OS" == "Linux" ]; then
+              # on Linux, we can simply rely on apt
               sudo apt install libwxgtk3.0-gtk3-dev
             fi
           fi
@@ -92,6 +81,9 @@ jobs:
         run: |
           mkdir build
           mkdir install
+
+          # on Windows and macOS, we use vcpkg to pull in our dependencies, and we need to direct
+          #  CMake to the toolchain-file (-> https://vcpkg.io/en/docs/users/buildsystems/cmake-integration.html)
           if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
             ls ${{ matrix.vcpkg_dir }}/scripts/buildsystems/
             echo ${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake
@@ -102,10 +94,8 @@ jobs:
               -DCMAKE_TOOLCHAIN_FILE=${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake \
               .
           else
+            # ...whereas on Linux, we use an apt-package, so we don't want to point to the vcpkg-toolchain-file
             if [ "$RUNNER_OS" == "Linux" ]; then
-              export CC=/usr/bin/gcc-9
-              export CXX=/usr/bin/g++-9
-
                cmake \
               -B ./build \
               -G "${{ matrix.generator }}" \
@@ -114,14 +104,7 @@ jobs:
             fi
 
             echo "$RUNNER_OS"
-            #cmake \
-            #  -B ./build \
-            #  -G "${{ matrix.generator }}" \
-            #  -DCMAKE_INSTALL_PREFIX=./install \
-            #  -DCMAKE_BUILD_TYPE=MinSizeRel \
-            #  -DEXAMPLE_TESTS=ON \
-            #  -DCMAKE_TOOLCHAIN_FILE=${{ matrix.vcpkg_dir }}/scripts/buildsystems/vcpkg.cmake \
-            #  .
+
           fi
 
       - name: Compile
@@ -142,6 +125,7 @@ jobs:
       #      otool -L ./install/bin/example
       #    fi
 
+      # gather the binaries and put them into a zip-file
       - name: Package
         id: create_artifact
         shell: bash
@@ -157,17 +141,18 @@ jobs:
           fi
           name=wxWidgetsTest-${{ matrix.suffix }}-$(git describe --always).zip
           mv -v ./wxWidgetsTest.zip release/${name}
-          #echo "::set-output name=name::${name}"
           echo "{name}={${name}}" >> $GITHUB_OUTPUT
-          #echo "::set-output name=path::release/${name}"
           echo "{path}={release/${name}}" >> $GITHUB_OUTPUT
 
+      # upload the build-results to artifacts-store
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
         with:
           name: Release
           path: release
 
+      # If the version we are building here has a tag, and this tag is starting with "v", then we want to upload it as
+      #  a "release" to the Github-repo. Here we put together a changelog (from the commit-messages).
       - name: Create Changelog
         id: create_changelog
         if: startsWith(github.ref, 'refs/tags/v')
@@ -181,6 +166,7 @@ jobs:
           fi
           cat changelog.txt
 
+      # ...and, now we put it on the Github-website
       - name: Release
         uses: ncipollo/release-action@v1
         if: startsWith(github.ref, 'refs/tags/v')
