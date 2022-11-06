@@ -34,3 +34,5 @@
 /build
 /.vs/
 /out/
+/.idea/
+/cmake-build-debug/
