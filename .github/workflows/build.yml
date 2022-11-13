@@ -68,7 +68,7 @@ jobs:
           if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
             # on Windows and macOS, we use vcpkg in order to pull in our dependencies,
             #  note also that the list of packages comes from the file "vcpkg.txt" in the repo
-            vcpkg install --triplet ${{ matrix.triplet }} $(cat vcpkg.txt) --recurse
+            vcpkg install --recurse --triplet ${{ matrix.triplet }} $(cat vcpkg.txt) 
           else
             if [ "$RUNNER_OS" == "Linux" ]; then
               # on Linux, we can simply rely on apt
