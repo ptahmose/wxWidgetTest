@@ -43,6 +43,16 @@ const char* html_page = R"_(
                 document.getElementById('statistics_data_size_of_files_processed_after_compression').innerHTML = statistics_object.data_size_of_files_processed_after_compression.toLocaleString('en');
             }
         }
+        function set_operational_state(is_running) {
+            if (is_running) {
+                document.getElementById('startbutton').setAttribute('disabled', '');
+                document.getElementById('stopbutton').removeAttribute('disabled');
+            }
+            else {
+                document.getElementById('startbutton').removeAttribute('disabled');
+                document.getElementById('stopbutton').setAttribute('disabled', '');
+            }
+        }
     </script>
 </head>
 <body>
@@ -77,8 +87,8 @@ const char* html_page = R"_(
     </p>
 
     <p>
-        <button type="button" id="startbutton " onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
-        <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'stopbutton','arg':t});})();">Stop</button>
+        <button type="button" id="startbutton" onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
+        <button type="button" id="stopbutton" disabled onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'stopbutton','arg':t});})();">Stop</button>
     </p>
 
     <p>
@@ -89,15 +99,15 @@ const char* html_page = R"_(
             </tr>
             <tr>
                 <td>files processed:</td>
-                <td><div id="statistics_files_processed"> </div></td>
+                <td><div id="statistics_files_processed">0</div></td>
             </tr>
             <tr>
                 <td>original total file size:</td>
-                <td><div id="statistics_data_size_of_files_processed_before_compression"> </div></td>
+                <td><div id="statistics_data_size_of_files_processed_before_compression">0</div></td>
             </tr>
             <tr>
                 <td>compressed total file size:</td>
-                <td><div id="statistics_data_size_of_files_processed_after_compression"> </div></td>
+                <td><div id="statistics_data_size_of_files_processed_after_compression">0</div></td>
             </tr>
         </table>
     </p>
@@ -108,7 +118,6 @@ const char* html_page = R"_(
 
 </body>
 </html>
-
 
 
 

@@ -96,6 +96,10 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
             operation_parameters.report_progress_functor = [this](const DoOperation::ProgressInformation& information)->void {this->ProgressEvent(information); };
             this->operation_.Start(operation_parameters);
         }
+        else if (id == "stopbutton")
+        {
+            this->operation_.RequestCancel();
+        }
     }
 }
 
@@ -205,6 +209,7 @@ void WebFrame::OnProgressEvent(wxCommandEvent& event)
 
     if (javascript_command.tellp() > 0) // test if "some commands" have been added, and only if so, execute the javascript-code
     {
+        javascript_command << "set_operational_state(" << (progress_info.operation_ongoing ? "true" : "false") << ");";
         this->web_view_->RunScriptAsync(javascript_command.str());
     }
 
@@ -244,6 +249,9 @@ void WebFrame::ChooseFolderAndSetInWebsite(const std::string& id, const std::str
 
 /*static*/std::string WebFrame::EscapeForJavascript(const std::wstring& text)
 {
+    // The idea is to convert a "wide-string" into a string which is "safe" to be used as
+    //  a string-constant in Javascript. What we do is very simple - only "plain characters"
+    //  are copied verbatim, everything else is converted to a "unicode code point".
     ostringstream result;
     for (const auto c : text)
     {

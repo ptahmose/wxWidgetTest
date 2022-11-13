@@ -29,13 +29,23 @@
         }
         function set_statistics(statistics_object) {
             if (statistics_object.hasOwnProperty('files_processed')) {
-                document.getElementById('statistics_files_processed').innerHTML = statistics_object.files_processed;
+                document.getElementById('statistics_files_processed').innerHTML = statistics_object.files_processed.toLocaleString('en');
             }
             if (statistics_object.hasOwnProperty('data_size_of_files_processed_before_compression')) {
-                document.getElementById('statistics_data_size_of_files_processed_before_compression').innerHTML = statistics_object.data_size_of_files_processed_before_compression;
+                document.getElementById('statistics_data_size_of_files_processed_before_compression').innerHTML = statistics_object.data_size_of_files_processed_before_compression.toLocaleString('en');
             }
             if (statistics_object.hasOwnProperty('data_size_of_files_processed_after_compression')) {
-                document.getElementById('statistics_data_size_of_files_processed_after_compression').innerHTML = statistics_object.data_size_of_files_processed_after_compression;
+                document.getElementById('statistics_data_size_of_files_processed_after_compression').innerHTML = statistics_object.data_size_of_files_processed_after_compression.toLocaleString('en');
+            }
+        }
+        function set_operational_state(is_running) {
+            if (is_running) {
+                document.getElementById('startbutton').setAttribute('disabled', '');
+                document.getElementById('stopbutton').removeAttribute('disabled');
+            }
+            else {
+                document.getElementById('startbutton').removeAttribute('disabled');
+                document.getElementById('stopbutton').setAttribute('disabled', '');
             }
         }
     </script>
@@ -72,8 +82,8 @@
     </p>
 
     <p>
-        <button type="button" id="startbutton " onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
-        <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'stopbutton','arg':t});})();">Stop</button>
+        <button type="button" id="startbutton" onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
+        <button type="button" id="stopbutton" disabled onclick="window.wx_msg.postMessage({'id':'stopbutton','arg':none});">Stop</button>
     </p>
 
     <p>
