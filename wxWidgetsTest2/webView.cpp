@@ -130,6 +130,8 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 
         if (object.HasMember("destinationfolder") && object["destinationfolder"].IsString())
         {
+            auto s = convertWideToUtf8(L"ÄÖÜßäöü");
+            const void* p = s.c_str();
             operation_parameters.destination_folder = object["destinationfolder"].GetString();
         }
 
@@ -159,14 +161,11 @@ void WebFrame::OnProgressEvent(wxCommandEvent& event)
 
     const auto& progress_info = progress_info_client_data->GetProgressInformation();
 
-    ostringstream javascript_command;
+    ostringstream javascript_command;   // in this stringstream we construct the code to execute "in" the website
 
     if (progress_info.message_valid)
     {
-        //ostringstream ss;
         javascript_command << "add_to_log(" << progress_info.remove_characters_before_adding_message << ",\"" << EscapeForJavascript(convertUtf8ToWide(progress_info.message)) << "\");";
-        //ss << "set_statistics( {'files_processed':42} );";
-        //this->web_view_->RunScriptAsync(ss.str());
     }
 
     if (progress_info.no_of_files_processed_valid ||
@@ -195,7 +194,10 @@ void WebFrame::OnProgressEvent(wxCommandEvent& event)
         javascript_command << "set_statistics(" << statistics_object.str() << ");";
     }
 
-    this->web_view_->RunScriptAsync(javascript_command.str());
+    if (javascript_command.tellp() > 0) // test if "some commands" have been added, and only if so, execute the javascript-code
+    {
+        this->web_view_->RunScriptAsync(javascript_command.str());
+    }
 
     // this is quite fishy, see comment when adding the event
     event.SetClientObject(nullptr);

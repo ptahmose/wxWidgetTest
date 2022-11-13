@@ -89,15 +89,15 @@ const char* html_page = R"_(
             </tr>
             <tr>
                 <td>files processed:</td>
-                <td><div id="statistics_files_processed">0</div></td>
+                <td><div id="statistics_files_processed"> </div></td>
             </tr>
             <tr>
                 <td>original total file size:</td>
-                <td><div id="statistics_data_size_of_files_processed_before_compression">0</div></td>
+                <td><div id="statistics_data_size_of_files_processed_before_compression"> </div></td>
             </tr>
             <tr>
                 <td>compressed total file size:</td>
-                <td><div id="statistics_data_size_of_files_processed_after_compression">0</div></td>
+                <td><div id="statistics_data_size_of_files_processed_after_compression"> </div></td>
             </tr>
         </table>
     </p>

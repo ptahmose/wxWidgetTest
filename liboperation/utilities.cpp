@@ -1,17 +1,17 @@
 #include "utilities.h"
 
+#include <codecvt>
+
 std::wstring convertUtf8ToWide(const std::string& str)
 {
-    std::wstring conv(str.size(), 0);
-    size_t size = std::mbstowcs(&conv[0], str.c_str(), str.size());
-    conv.resize(size);
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8conv;
+    std::wstring conv = utf8conv.from_bytes(str);
     return conv;
 }
 
 std::string convertWideToUtf8(const std::wstring& str)
 {
-    size_t requiredSize = std::wcstombs(nullptr, str.c_str(), 0);
-    std::string conv(requiredSize, 0);
-    conv.resize(std::wcstombs(&conv[0], str.c_str(), requiredSize));
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> utf8_conv;
+    std::string conv = utf8_conv.to_bytes(str);
     return conv;
 }
