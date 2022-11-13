@@ -8,18 +8,19 @@ const char* html_page = R"_(
 <head>
     <title>wxWidgetsTest2</title>
     <script>
-                function get_options() {
+        function get_options() {
             var recursive = document.getElementById('recursivecheckbox').checked;
             var whattocompress = document.getElementById('whattocompresscombobox').value;
             var compressionlevel = parseInt(document.getElementById('compressionlevelnumerictextbox').value, 10);
             var source_folder = document.getElementById('sourcefolderinputtextbox').value;
             var destination_folder = document.getElementById('destinationfolderinputtextbox').value;
             return {
-                'recursive':recursive,
-                'whattocompress':whattocompress,
-                'compressionlevel':compressionlevel,
-                'sourcefolder':source_folder,
-                'destinationfolder':destination_folder };
+                'recursive': recursive,
+                'whattocompress': whattocompress,
+                'compressionlevel': compressionlevel,
+                'sourcefolder': source_folder,
+                'destinationfolder': destination_folder
+            };
             //alert(recursive +  " | " + whattocompress + "| " + compressionlevel);
         }
         function add_to_log(characters_to_delete, text) {
@@ -29,6 +30,17 @@ const char* html_page = R"_(
             else {
                 var t = document.getElementById('logtextbox').value;
                 document.getElementById('logtextbox').value = t.slice(0, -characters_to_delete) + text;
+            }
+        }
+        function set_statistics(statistics_object) {
+            if (statistics_object.hasOwnProperty('files_processed')) {
+                document.getElementById('statistics_files_processed').innerHTML = statistics_object.files_processed.toLocaleString('en');
+            }
+            if (statistics_object.hasOwnProperty('data_size_of_files_processed_before_compression')) {
+                document.getElementById('statistics_data_size_of_files_processed_before_compression').innerHTML = statistics_object.data_size_of_files_processed_before_compression.toLocaleString('en');
+            }
+            if (statistics_object.hasOwnProperty('data_size_of_files_processed_after_compression')) {
+                document.getElementById('statistics_data_size_of_files_processed_after_compression').innerHTML = statistics_object.data_size_of_files_processed_after_compression.toLocaleString('en');
             }
         }
     </script>
@@ -65,7 +77,7 @@ const char* html_page = R"_(
     </p>
 
     <p>
-        <button type="button" id ="startbutton " onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
+        <button type="button" id="startbutton " onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
         <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'stopbutton','arg':t});})();">Stop</button>
     </p>
 
@@ -77,15 +89,15 @@ const char* html_page = R"_(
             </tr>
             <tr>
                 <td>files processed:</td>
-                <td>0</td>
+                <td><div id="statistics_files_processed">0</div></td>
             </tr>
             <tr>
                 <td>original total file size:</td>
-                <td>0</td>
+                <td><div id="statistics_data_size_of_files_processed_before_compression">0</div></td>
             </tr>
             <tr>
                 <td>compressed total file size:</td>
-                <td>0</td>
+                <td><div id="statistics_data_size_of_files_processed_after_compression">0</div></td>
             </tr>
         </table>
     </p>
@@ -96,6 +108,7 @@ const char* html_page = R"_(
 
 </body>
 </html>
+
 
 
 

@@ -109,8 +109,8 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 
             const char* what_to_compress_id = object["whattocompress"].GetString();
             const auto it = find_if(
-                htmlid_to_enum.begin(), 
-                htmlid_to_enum.end(), 
+                htmlid_to_enum.begin(),
+                htmlid_to_enum.end(),
                 [what_to_compress_id](const auto& i) -> bool {return strcmp(what_to_compress_id, get<0>(i)) == 0; });
             if (it != htmlid_to_enum.end())
             {
@@ -159,16 +159,43 @@ void WebFrame::OnProgressEvent(wxCommandEvent& event)
 
     const auto& progress_info = progress_info_client_data->GetProgressInformation();
 
+    ostringstream javascript_command;
+
     if (progress_info.message_valid)
     {
-        ostringstream ss;
-        /*ss << "document.getElementById(\"logtextbox\").value+=\"";
-        ss << EscapeForJavascript(convertUtf8ToWide(progress_info.message));
-        ss << "\";";*/
-        ss << "add_to_log(" << progress_info.remove_characters_before_adding_message << ",\"" << EscapeForJavascript(convertUtf8ToWide(progress_info.message)) << "\");";
-        //static const char* js = "document.getElementById(\"logtextbox\").value+=\"XYZ\n\"";
-        this->web_view_->RunScriptAsync(ss.str());
+        //ostringstream ss;
+        javascript_command << "add_to_log(" << progress_info.remove_characters_before_adding_message << ",\"" << EscapeForJavascript(convertUtf8ToWide(progress_info.message)) << "\");";
+        //ss << "set_statistics( {'files_processed':42} );";
+        //this->web_view_->RunScriptAsync(ss.str());
     }
+
+    if (progress_info.no_of_files_processed_valid ||
+        progress_info.data_size_of_files_processed_before_compression_valid ||
+        progress_info.data_size_of_files_processed_after_compression_valid)
+    {
+        ostringstream statistics_object;
+        statistics_object << "{";
+        if (progress_info.no_of_files_processed_valid)
+        {
+            statistics_object << "'files_processed':" << progress_info.no_of_files_processed << ",";
+        }
+
+        if (progress_info.data_size_of_files_processed_before_compression_valid)
+        {
+            statistics_object << "'data_size_of_files_processed_before_compression':" << progress_info.data_size_of_files_before_compression_processed << ",";
+        }
+
+        if (progress_info.data_size_of_files_processed_after_compression_valid)
+        {
+            statistics_object << "'data_size_of_files_processed_after_compression':" << progress_info.data_size_of_files_processed_after_compression << ",";
+        }
+
+        statistics_object << "}";
+
+        javascript_command << "set_statistics(" << statistics_object.str() << ");";
+    }
+
+    this->web_view_->RunScriptAsync(javascript_command.str());
 
     // this is quite fishy, see comment when adding the event
     event.SetClientObject(nullptr);
@@ -463,7 +490,7 @@ private:
         //string text_of_control = result->result;
         //delete result;
         //return text_of_control;
-    }
+}
 
     void OnAsyncRunScriptEvent(const wxWebViewEvent& evt)
     {
