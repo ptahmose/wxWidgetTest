@@ -1,6 +1,7 @@
 #include "utilities.h"
 
 #include <codecvt>
+#include <locale>
 
 std::wstring convertUtf8ToWide(const std::string& str)
 {

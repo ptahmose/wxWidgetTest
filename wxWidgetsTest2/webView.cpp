@@ -3,8 +3,8 @@
 #include <wx/fs_arc.h>
 #include <wx/fs_mem.h>
 #include <wx/webview.h>
-#include <wx/msw/webview_edge.h>
-#include <wx/msw/webview_ie.h>
+//#include <wx/msw/webview_edge.h>
+//#include <wx/msw/webview_ie.h>
 #include <wx/webviewfshandler.h>
 #include <wx/windowptr.h>
 #include "wx/stdpaths.h"
@@ -26,8 +26,19 @@ WebFrame::WebFrame() : wxFrame(nullptr, wxID_ANY, "wxWidget-WebView Demo")
 {
     wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
     this->SetSizer(topsizer);
-    bool b = wxWebView::IsBackendAvailable(wxWebViewBackendEdge);
-    this->web_view_ = wxWebView::New(wxWebViewBackendEdge);
+    if (wxWebView::IsBackendAvailable(wxWebViewBackendEdge))
+    {
+        this->web_view_ = wxWebView::New(wxWebViewBackendEdge);
+    }
+    else if (wxWebView::IsBackendAvailable(wxWebViewBackendWebKit))
+    {
+        this->web_view_ = wxWebView::New(wxWebViewBackendWebKit);
+    }
+    else
+    {
+        // TODO:
+    }
+
     this->web_view_->Create(this, Ids::WebView, "", wxDefaultPosition, wxDefaultSize);
     //this->web_view_ = new wxWebViewEdge(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize);
     topsizer->Add(this->web_view_, wxSizerFlags().Expand().Proportion(1));
@@ -51,7 +62,7 @@ WebFrame::WebFrame() : wxFrame(nullptr, wxID_ANY, "wxWidget-WebView Demo")
 
 void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 {
-    string message = evt.GetString().ToUTF8();
+    string message = string{evt.GetString().ToUTF8()};
     rapidjson::Document document;
     document.Parse<0>(message.c_str());
     if (!document.HasParseError())
@@ -130,7 +141,7 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 
         if (object.HasMember("destinationfolder") && object["destinationfolder"].IsString())
         {
-            auto s = convertWideToUtf8(L"ÄÖÜßäöü");
+            auto s = convertWideToUtf8(L"ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½");
             const void* p = s.c_str();
             operation_parameters.destination_folder = object["destinationfolder"].GetString();
         }
