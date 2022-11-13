@@ -3,8 +3,6 @@
 #include <wx/fs_arc.h>
 #include <wx/fs_mem.h>
 #include <wx/webview.h>
-//#include <wx/msw/webview_edge.h>
-//#include <wx/msw/webview_ie.h>
 #include <wx/webviewfshandler.h>
 #include <wx/windowptr.h>
 #include "wx/stdpaths.h"
