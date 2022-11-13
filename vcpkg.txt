@@ -1,1 +1,1 @@
-wxwidgets
+wxwidgets wxwidgets[webview]
