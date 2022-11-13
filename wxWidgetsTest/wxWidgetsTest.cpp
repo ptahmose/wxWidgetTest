@@ -4,9 +4,9 @@
 
 #include <wx/dirdlg.h>
 #include "wxWidgetsTest.h"
+#include <compressionOptions.h>
+#include <DoOperation.h>
 #include "wxProgressInfoClientData.h"
-#include "compressionOptions.h"
-#include "DoOperation.h"
 
 using namespace std;
 

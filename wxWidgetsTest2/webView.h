@@ -1,6 +1,8 @@
 #pragma once
 
 #include <wx/webview.h>
+#include <rapidjson/document.h>
+#include <DoOperation.h>
 
 class WebFrame : public wxFrame
 {
@@ -23,6 +25,8 @@ private:
 
     static std::string EscapeForJavascript(const std::wstring& text);
     void ChooseFolderAndSetInWebsite(const std::string& id, const std::string& current_folder);
+
+    static bool TryParseJson(const rapidjson::Document& json_document, DoOperation::Parameters& operation_parameters);
 
     /*Test*/
     void ButtonOneClicked(wxCommandEvent& event);

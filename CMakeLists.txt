@@ -25,6 +25,8 @@ include(${wxWidgets_USE_FILE})
 include("${CMAKE_SOURCE_DIR}/cmake/modules/rapidjson.cmake")
 
 # Include sub-projects.
+add_subdirectory ("liboperation")
+
 add_subdirectory ("wxWidgetsTest")
 
 add_subdirectory ("wxWidgetsTest2")

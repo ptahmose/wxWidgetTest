@@ -2,6 +2,15 @@
 <html>
 <head>
     <title>wxWidgetsTest2</title>
+    <script>
+        function get_options() {
+            var recursive = document.getElementById('recursivecheckbox').checked;
+            var whattocompress = document.getElementById('whattocompresscombobox').value;
+            var compressionlevel = parseInt(document.getElementById('compressionlevelnumerictextbox').value, 10);
+            return { 'recursive': recursive, 'whattocompress': whattocompress, 'compressionlevel': compressionlevel };
+            //alert(recursive +  " | " + whattocompress + "| " + compressionlevel);
+        }
+    </script>
 </head>
 <body>
     <h1>wxWidgetsTest2</h1>
@@ -35,7 +44,7 @@
     </p>
 
     <p>
-        <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'startbutton','arg':t});})();">Start</button>
+        <button type="button" id ="startbutton " onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
         <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'stopbutton','arg':t});})();">Stop</button>
     </p>
 

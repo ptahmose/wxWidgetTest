@@ -8,7 +8,7 @@
 #include <wx/windowptr.h>
 #include <wx/spinctrl.h>
 
-#include "DoOperation.h"
+#include <DoOperation.h>
 
 class Frame : public wxFrame
 {

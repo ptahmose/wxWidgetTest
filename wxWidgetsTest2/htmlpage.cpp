@@ -2,22 +2,32 @@
 
 const char* html_page = R"_(
 
+
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <title>wxWidgetsTest2</title>
+    <script>
+        function get_options() {
+            var recursive = document.getElementById('recursivecheckbox').checked;
+            var whattocompress = document.getElementById('whattocompresscombobox').value;
+            var compressionlevel = parseInt(document.getElementById('compressionlevelnumerictextbox').value, 10);
+            return { 'recursive': recursive, 'whattocompress': whattocompress, 'compressionlevel': compressionlevel };
+            //alert(recursive +  " | " + whattocompress + "| " + compressionlevel);
+        }
+    </script>
 </head>
 <body>
     <h1>wxWidgetsTest2</h1>
 
     <p>
         <label for="name">Source folder:</label>
-        <input type="text" id="sourcefolderinputtextbox" >
+        <input type="text" id="sourcefolderinputtextbox">
         <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'sourcefolderinputtextbox','arg':t});})();">...</button>
     </p>
     <p>
         <label for="name">Destination folder:</label>
-        <input type="text" id="destinationfolderinputtextbox" >
+        <input type="text" id="destinationfolderinputtextbox">
         <button type="button" onclick="(function(){t=document.getElementById('destinationfolderinputtextbox').value;window.wx_msg.postMessage({'id':'destinationfolderinputtextbox','arg':t});})();">...</button>
     </p>
 
@@ -27,7 +37,7 @@ const char* html_page = R"_(
     </p>
     <p>
         <label for="whattocompresscombobox">What to compress:</label>
-        <select id="whattocompresscombobox" >
+        <select id="whattocompresscombobox">
             <option value="only_uncompressed">only uncompressed subblocks</option>
             <option value="uncompressed_and_zstd">uncompressed & zstd compressed subblocks</option>
             <option value="uncompressed_and_zstd_and_jpgxr">uncompressed & zstd & JPGXR compressed subblocks</option>
@@ -39,28 +49,28 @@ const char* html_page = R"_(
     </p>
 
     <p>
-        <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'startbutton','arg':t});})();">Start</button>
+        <button type="button" id ="startbutton " onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});">Start</button>
         <button type="button" onclick="(function(){t=document.getElementById('sourcefolderinputtextbox').value;window.wx_msg.postMessage({'id':'stopbutton','arg':t});})();">Stop</button>
     </p>
 
     <p>
         <table style="width:100%">
-          <tr>
-            <th>reading</th>
-            <th>value</th>
-          </tr>
-          <tr>
-            <td>files processed:</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <td>original total file size:</td>
-            <td>0</td>
-          </tr>
-          <tr>
-            <td>compressed total file size:</td>
-            <td>0</td>
-          </tr>
+            <tr>
+                <th>reading</th>
+                <th>value</th>
+            </tr>
+            <tr>
+                <td>files processed:</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>original total file size:</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>compressed total file size:</td>
+                <td>0</td>
+            </tr>
         </table>
     </p>
 
@@ -70,6 +80,8 @@ const char* html_page = R"_(
 
 </body>
 </html>
+
+
 
 
 

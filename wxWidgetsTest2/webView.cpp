@@ -9,9 +9,10 @@
 #include <wx/windowptr.h>
 #include "wx/stdpaths.h"
 
-#include "rapidjson/document.h"
-
 #include <sstream>
+#include <tuple>
+#include <array>
+#include <algorithm>
 #include "webView.h"
 
 #include "htmlpage.h"
@@ -75,7 +76,67 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
             // the "browse-button" of the "destination-folder-selection" has been clicked
             this->ChooseFolderAndSetInWebsite(id, arg);
         }
+        else if (id == "startbutton")
+        {
+            DoOperation::Parameters operation_parameters;
+            TryParseJson(document, operation_parameters);
+        }
     }
+}
+
+/*static*/bool WebFrame::TryParseJson(const rapidjson::Document& json_document, DoOperation::Parameters& operation_parameters)
+{
+    if (json_document.HasMember("arg") && json_document["arg"].IsObject())
+    {
+        auto object = json_document["arg"].GetObject();
+        if (object.HasMember("recursive") && object["recursive"].IsBool())
+        {
+            operation_parameters.recursive_folder_traversal = object["recursive"].GetBool();
+        }
+
+        if (object.HasMember("whattocompress") && object["whattocompress"].IsString())
+        {
+            const char* what_to_compress_id = object["whattocompress"].GetString();
+
+            static const array<tuple<const char*, CompressionOptions::WhatToCompress>, 3> htmlid_to_enum =
+            {
+                make_tuple("only_uncompressed", CompressionOptions::WhatToCompress::kOnlyUncompressed),
+                make_tuple("uncompressed_and_zstd", CompressionOptions::WhatToCompress::kUncompressedAndZstd),
+                make_tuple("uncompressed_and_zstd_and_jpgxr", CompressionOptions::WhatToCompress::kUncompressedAndZstdAndJpgxr)
+            };
+
+            const auto it = find_if(
+                htmlid_to_enum.begin(), 
+                htmlid_to_enum.end(), 
+                [what_to_compress_id](const auto& i) -> bool {return strcmp(what_to_compress_id, get<0>(i)) == 0; });
+
+            if (it != htmlid_to_enum.end())
+            {
+                operation_parameters.compression_options.what_to_compress = get<1>(*it);
+            }
+            //if (what_to_compress_id == "only_uncompressed")
+            //{
+            //    operation_parameters.compression_options.what_to_compress = CompressionOptions::WhatToCompress::kOnlyUncompressed;
+            //}
+            //else if (what_to_compress_id == "uncompressed_and_zstd")
+            //{
+            //    operation_parameters.compression_options.what_to_compress = CompressionOptions::WhatToCompress::kUncompressedAndZstd;
+            //}
+            //else if (what_to_compress_id == "uncompressed_and_zstd_and_jpgxr")
+            //{
+            //    operation_parameters.compression_options.what_to_compress = CompressionOptions::WhatToCompress::kUncompressedAndZstdAndJpgxr;
+            //}
+        }
+
+        if (object.HasMember("compressionlevel") && object["compressionlevel"].IsInt())
+        {
+            operation_parameters.compression_options.zstd_level = object["compressionlevel"].GetInt();
+        }
+
+        return true;
+    }
+
+    return false;
 }
 
 void WebFrame::ChooseFolderAndSetInWebsite(const std::string& id, const std::string& current_folder)
@@ -376,7 +437,7 @@ private:
         result->isDone = true;
     }
 
-    };
+};
 #endif
 
 // ----------------------------------------------------------------------------
