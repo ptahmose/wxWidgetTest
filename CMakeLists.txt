@@ -18,8 +18,13 @@ sudo apt install libwxgtk3.0-gtk3-dev
 ]]#
 
 
-find_package(wxWidgets  REQUIRED COMPONENTS net core base)
+find_package(wxWidgets  REQUIRED COMPONENTS net core base webview)
+set(wxUSE_WEBVIEW_EDGE 1)
 include(${wxWidgets_USE_FILE})
+
+include("${CMAKE_SOURCE_DIR}/cmake/modules/rapidjson.cmake")
 
 # Include sub-projects.
 add_subdirectory ("wxWidgetsTest")
+
+add_subdirectory ("wxWidgetsTest2")
