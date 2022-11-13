@@ -7,8 +7,24 @@
             var recursive = document.getElementById('recursivecheckbox').checked;
             var whattocompress = document.getElementById('whattocompresscombobox').value;
             var compressionlevel = parseInt(document.getElementById('compressionlevelnumerictextbox').value, 10);
-            return { 'recursive': recursive, 'whattocompress': whattocompress, 'compressionlevel': compressionlevel };
+            var source_folder = document.getElementById('sourcefolderinputtextbox').value;
+            var destination_folder = document.getElementById('destinationfolderinputtextbox').value;
+            return {
+                'recursive':recursive,
+                'whattocompress':whattocompress,
+                'compressionlevel':compressionlevel,
+                'sourcefolder':source_folder,
+                'destinationfolder':destination_folder };
             //alert(recursive +  " | " + whattocompress + "| " + compressionlevel);
+        }
+        function add_to_log(characters_to_delete, text) {
+            if (characters_to_delete == 0) {
+                document.getElementById('logtextbox').value += text;
+            }
+            else {
+                var t = document.getElementById('logtextbox').value;
+                document.getElementById('logtextbox').value = t.slice(0, -characters_to_delete) + text;
+            }
         }
     </script>
 </head>
@@ -40,7 +56,7 @@
     </p>
     <p>
         <label for="compressionlevelnumerictextbox">compression level:</label>
-        <input type="number" id="compressionlevelnumerictextbox" max="22" min="-131000" value="0">
+        <input type="number" id="compressionlevelnumerictextbox" min="-131000" max="22" value="0">
     </p>
 
     <p>

@@ -8,12 +8,28 @@ const char* html_page = R"_(
 <head>
     <title>wxWidgetsTest2</title>
     <script>
-        function get_options() {
+                function get_options() {
             var recursive = document.getElementById('recursivecheckbox').checked;
             var whattocompress = document.getElementById('whattocompresscombobox').value;
             var compressionlevel = parseInt(document.getElementById('compressionlevelnumerictextbox').value, 10);
-            return { 'recursive': recursive, 'whattocompress': whattocompress, 'compressionlevel': compressionlevel };
+            var source_folder = document.getElementById('sourcefolderinputtextbox').value;
+            var destination_folder = document.getElementById('destinationfolderinputtextbox').value;
+            return {
+                'recursive':recursive,
+                'whattocompress':whattocompress,
+                'compressionlevel':compressionlevel,
+                'sourcefolder':source_folder,
+                'destinationfolder':destination_folder };
             //alert(recursive +  " | " + whattocompress + "| " + compressionlevel);
+        }
+        function add_to_log(characters_to_delete, text) {
+            if (characters_to_delete == 0) {
+                document.getElementById('logtextbox').value += text;
+            }
+            else {
+                var t = document.getElementById('logtextbox').value;
+                document.getElementById('logtextbox').value = t.slice(0, -characters_to_delete) + text;
+            }
         }
     </script>
 </head>
@@ -80,6 +96,7 @@ const char* html_page = R"_(
 
 </body>
 </html>
+
 
 
 

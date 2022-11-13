@@ -15,7 +15,9 @@
 #include <algorithm>
 #include "webView.h"
 
+#include "wxProgressInfoClientData.h"
 #include "htmlpage.h"
+#include "utilities.h"
 #include "wxlogo.xpm"
 
 using namespace std;
@@ -79,7 +81,9 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
         else if (id == "startbutton")
         {
             DoOperation::Parameters operation_parameters;
-            TryParseJson(document, operation_parameters);
+            const bool parsed_ok = TryParseJson(document, operation_parameters);
+            operation_parameters.report_progress_functor = [this](const DoOperation::ProgressInformation& information)->void {this->ProgressEvent(information); };
+            this->operation_.Start(operation_parameters);
         }
     }
 }
@@ -96,8 +100,6 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 
         if (object.HasMember("whattocompress") && object["whattocompress"].IsString())
         {
-            const char* what_to_compress_id = object["whattocompress"].GetString();
-
             static const array<tuple<const char*, CompressionOptions::WhatToCompress>, 3> htmlid_to_enum =
             {
                 make_tuple("only_uncompressed", CompressionOptions::WhatToCompress::kOnlyUncompressed),
@@ -105,27 +107,15 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
                 make_tuple("uncompressed_and_zstd_and_jpgxr", CompressionOptions::WhatToCompress::kUncompressedAndZstdAndJpgxr)
             };
 
+            const char* what_to_compress_id = object["whattocompress"].GetString();
             const auto it = find_if(
                 htmlid_to_enum.begin(), 
                 htmlid_to_enum.end(), 
                 [what_to_compress_id](const auto& i) -> bool {return strcmp(what_to_compress_id, get<0>(i)) == 0; });
-
             if (it != htmlid_to_enum.end())
             {
                 operation_parameters.compression_options.what_to_compress = get<1>(*it);
             }
-            //if (what_to_compress_id == "only_uncompressed")
-            //{
-            //    operation_parameters.compression_options.what_to_compress = CompressionOptions::WhatToCompress::kOnlyUncompressed;
-            //}
-            //else if (what_to_compress_id == "uncompressed_and_zstd")
-            //{
-            //    operation_parameters.compression_options.what_to_compress = CompressionOptions::WhatToCompress::kUncompressedAndZstd;
-            //}
-            //else if (what_to_compress_id == "uncompressed_and_zstd_and_jpgxr")
-            //{
-            //    operation_parameters.compression_options.what_to_compress = CompressionOptions::WhatToCompress::kUncompressedAndZstdAndJpgxr;
-            //}
         }
 
         if (object.HasMember("compressionlevel") && object["compressionlevel"].IsInt())
@@ -133,10 +123,56 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
             operation_parameters.compression_options.zstd_level = object["compressionlevel"].GetInt();
         }
 
+        if (object.HasMember("sourcefolder") && object["sourcefolder"].IsString())
+        {
+            operation_parameters.source_folder = object["sourcefolder"].GetString();
+        }
+
+        if (object.HasMember("destinationfolder") && object["destinationfolder"].IsString())
+        {
+            operation_parameters.destination_folder = object["destinationfolder"].GetString();
+        }
+
         return true;
     }
 
     return false;
+}
+
+void WebFrame::ProgressEvent(const DoOperation::ProgressInformation& information)
+{
+    // Note that this method is called from an arbitrary thread context
+    wxCommandEvent* event = new  wxCommandEvent(wxEVT_PROGRESS_EVENT, PROGRESS_EVENT_ID);
+    event->SetClientObject(new wxProgressInfoClientData(information));
+
+    // The event-queue will take ownership of the event-object.
+    // However - note that nobody seems to delete the "client-object", the command-object does not
+    //  seem do this. This is kind of fishy. It would maybe more prudent if we would maintain our own
+    //  queue here, and use the event just to notify the UI-thread.
+    this->GetEventHandler()->QueueEvent(event);
+}
+
+void WebFrame::OnProgressEvent(wxCommandEvent& event)
+{
+    // get the number sent along with the event and use it to update the GUI
+    const wxProgressInfoClientData* progress_info_client_data = dynamic_cast<wxProgressInfoClientData*>(event.GetClientObject());
+
+    const auto& progress_info = progress_info_client_data->GetProgressInformation();
+
+    if (progress_info.message_valid)
+    {
+        ostringstream ss;
+        /*ss << "document.getElementById(\"logtextbox\").value+=\"";
+        ss << EscapeForJavascript(convertUtf8ToWide(progress_info.message));
+        ss << "\";";*/
+        ss << "add_to_log(" << progress_info.remove_characters_before_adding_message << ",\"" << EscapeForJavascript(convertUtf8ToWide(progress_info.message)) << "\");";
+        //static const char* js = "document.getElementById(\"logtextbox\").value+=\"XYZ\n\"";
+        this->web_view_->RunScriptAsync(ss.str());
+    }
+
+    // this is quite fishy, see comment when adding the event
+    event.SetClientObject(nullptr);
+    delete progress_info_client_data;
 }
 
 void WebFrame::ChooseFolderAndSetInWebsite(const std::string& id, const std::string& current_folder)
@@ -208,7 +244,7 @@ wxBEGIN_EVENT_TABLE(WebFrame, wxFrame)
 //EVT_BUTTON(Frame::Ids::ChooseDestinationFolderButton, Frame::OnChooseDestinationFolderButton)
 //EVT_BUTTON(Frame::Ids::StartButton, Frame::OnStartButton)
 //EVT_BUTTON(Frame::Ids::StopButton, Frame::OnStopButton)
-//EVT_COMMAND(Frame::PROGRESS_EVENT_ID, wxEVT_PROGRESS_EVENT, Frame::OnProgressEvent)
+EVT_COMMAND(WebFrame::PROGRESS_EVENT_ID, wxEVT_PROGRESS_EVENT, WebFrame::OnProgressEvent)
 wxEND_EVENT_TABLE()
 
 #if 0

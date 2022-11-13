@@ -8,7 +8,9 @@ add_executable(wxWidgetsTest2 WIN32
   "webView.cpp" 
   "webView.h"  
   "htmlpage.h" 
-  "htmlpage.cpp")
+  "htmlpage.cpp"
+  "wxProgressInfoClientData.h"
+  "wxProgressInfoClientData.cpp")
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set_property(TARGET wxWidgetsTest2 PROPERTY CXX_STANDARD 17)
