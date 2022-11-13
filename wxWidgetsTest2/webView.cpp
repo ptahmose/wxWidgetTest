@@ -141,8 +141,6 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 
         if (object.HasMember("destinationfolder") && object["destinationfolder"].IsString())
         {
-            auto s = convertWideToUtf8(L"�������");
-            const void* p = s.c_str();
             operation_parameters.destination_folder = object["destinationfolder"].GetString();
         }
 
