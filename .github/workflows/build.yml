@@ -69,7 +69,7 @@ jobs:
             # on Windows and macOS, we use vcpkg in order to pull in our dependencies,
             #  note also that the list of packages comes from the file "vcpkg.txt" in the repo
             #vcpkg install --recurse --triplet ${{ matrix.triplet }} $(cat vcpkg.txt) 
-            vcpkg install  --triplet ${{ matrix.triplet }} webview2 wil wxwidgets wxwidgets[webview]
+            vcpkg install  --recurse --triplet ${{ matrix.triplet }} webview2 wil wxwidgets wxwidgets[webview]
             #vcpkg install  --triplet ${{ matrix.triplet }} "wxwidgets[webview]" --recurse
             echo "all is fine"
           else
