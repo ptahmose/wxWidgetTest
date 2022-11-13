@@ -67,16 +67,12 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Windows" ] || [ "$RUNNER_OS" == "macOS" ]; then
             # on Windows and macOS, we use vcpkg in order to pull in our dependencies,
-            #  note also that the list of packages comes from the file "vcpkg.txt" in the repo
-            #vcpkg install --recurse --triplet ${{ matrix.triplet }} $(cat vcpkg.txt) 
             vcpkg install  --recurse --triplet ${{ matrix.triplet }} webview2 wil wxwidgets wxwidgets[webview]
-            #vcpkg install  --triplet ${{ matrix.triplet }} "wxwidgets[webview]" --recurse
-            echo "all is fine"
           else
             if [ "$RUNNER_OS" == "Linux" ]; then
               # on Linux, we can simply rely on apt
               # sudo apt install libwxgtk3.0-gtk3-dev
-              #  https://docs.codelite.org/wxWidgets/repo320/#ubuntu-and-debian
+              # -> https://docs.codelite.org/wxWidgets/repo320/#ubuntu-and-debian
               sudo apt-key adv --fetch-keys https://repos.codelite.org/CodeLite.asc 
               sudo apt-add-repository 'deb https://repos.codelite.org/wx3.2.0/ubuntu/ jammy universe'
               sudo apt-get install libwxbase3.2-0-unofficial libwxbase3.2unofficial-dev libwxgtk3.2-0-unofficial libwxgtk3.2unofficial-dev wx3.2-headers wx-common libwxgtk-webview3.2-0-unofficial libwxgtk-webview3.2unofficial-dev 
