@@ -285,234 +285,6 @@ wxBEGIN_EVENT_TABLE(WebFrame, wxFrame)
 EVT_COMMAND(WebFrame::PROGRESS_EVENT_ID, wxEVT_PROGRESS_EVENT, WebFrame::OnProgressEvent)
 wxEND_EVENT_TABLE()
 
-#if 0
-
-
-class WebFrame : public wxFrame
-{
-private:
-    wxWebView* m_browser;
-public:
-    WebFrame() : wxFrame(nullptr, wxID_ANY, "wxWidget-WebView Demo")
-    {
-        wxBoxSizer* topsizer = new wxBoxSizer(wxVERTICAL);
-        this->SetSizer(topsizer);
-
-        // Check if a fixed version of edge is present in
-   // $executable_path/edge_fixed and use it
-        wxFileName edgeFixedDir(wxStandardPaths::Get().GetExecutablePath());
-        edgeFixedDir.SetFullName("");
-        edgeFixedDir.AppendDir("edge_fixed");
-        if (edgeFixedDir.DirExists())
-        {
-            wxWebViewEdge::MSWSetBrowserExecutableDir(edgeFixedDir.GetFullPath());
-            wxLogMessage("Using fixed edge version");
-        }
-
-
-        bool b = wxWebView::IsBackendAvailable(wxWebViewBackendEdge);
-
-        /*this->m_browser = wxWebView::New(wxWebViewBackendEdge);
-        this->m_browser->Create(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize);*/
-
-        this->m_browser = new wxWebViewEdge(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize);
-        //this->m_browser = new wxWebViewIE(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize);
-        topsizer->Add(this->m_browser, wxSizerFlags().Expand().Proportion(1));
-
-        this->m_browser->RegisterHandler(wxSharedPtr<wxWebViewHandler>(new wxWebViewFSHandler("memory")));
-        // this->m_browser->LoadURL("memory:page1.htm");
-        this->m_browser->SetPage(
-            /*"<html><head><title>File System Example</title>"
-            "<link rel='stylesheet' type='text/css' href='memory:test.css'>"
-            "</head><body><h1>Page 1</h1>"
-            "<p><img src='memory:logo.png'></p>"
-            "<p><button  onclick=\"window.wx_msg.postMessage('Hello from HTML')\">Click</button>"
-            "<p>Some text about <a href='memory:page2.htm'>Page 2</a>.</p></body>",*/
-            html_page,
-            "");
-        // this->m_browser->LoadURL("https://docs.wxpython.org/wx.html2.WebViewHandler.html");
-
-        //this->m_browser->AddScriptMessageHandler("wx_msg");
-
-         //Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &WebFrame::OnScriptMessage, this, m_browser->GetId());
-
-        if (!m_browser->AddScriptMessageHandler("wx_msg"))
-        {
-            wxLogError("Could not add script message handler");
-        }
-
-        this->m_browser->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, [this](wxWebViewEvent& evt) {this->OnWxMsg(evt); });
-
-        wxButton* button = new wxButton(this, wxID_ANY, " ... ", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
-        topsizer->Add(button, wxSizerFlags(1).Align(wxALIGN_CENTER_HORIZONTAL).Border(wxALL, 1).Proportion(0));
-        button->Bind(wxEVT_BUTTON, &WebFrame::ButtonOneClicked, this);
-
-        //Set a more sensible size for web browsing
-        SetSize(FromDIP(wxSize(800, 600)));
-    }
-private:
-    static std::string EscapeForJavascript(const std::wstring& text)
-    {
-        ostringstream result;
-        for (auto c : text)
-        {
-            if ((c >= 'a' && c < 'z') || (c >= 'A' && c < 'Z') || (c >= '0' && c < '9'))
-            {
-                result << ((char)c);
-            }
-            else
-            {
-                result << "\\x" << hex << (uint64_t)c;
-            }
-        }
-
-        return result.str();
-    }
-
-    void ButtonOneClicked(wxCommandEvent& event)
-    {
-        //this->m_browser->RunScript("document.write('Hello from wxWidgets!')");
-        //this->m_browser->RunScript("document.getElementById(\"sourcefolderinputtextbox\").setAttribute('value','HELLO WORLD');");
-        //this->RunAsyncScript("function f(){return document.getElementById(\"destinationfolderinputtextbox\").value;}f();");
-
-        string s = this->GetSourceFolderTextFieldText();
-        return;
-    }
-
-    void OnWxMsg(wxWebViewEvent& evt)
-    {
-        if (evt.GetString() == "destinationfolderinputtextbox_clicked")
-        {
-            wxWindowPtr<wxDirDialog> folderBrowserDialog(new wxDirDialog(this, wxEmptyString));
-            string currentText = this->GetDestinationFolderTextFieldText();
-            /* if (currentText.empty())
-             {
-                 folderBrowserDialog->SetPath(wxStandardPaths::Get().GetDocumentsDir());
-             }
-             else
-             {
-                 folderBrowserDialog->SetPath(currentText);
-             }
-
-             folderBrowserDialog->Bind(
-                 wxEVT_WINDOW_MODAL_DIALOG_CLOSED,
-                 [this, folderBrowserDialog](wxWindowModalDialogEvent& event)
-                 {
-                     if (event.GetReturnCode() == wxID_OK)
-                     {
-                         wstring folder = folderBrowserDialog->GetPath().ToStdWstring();
-                         ostringstream ss;
-                         ss << "document.getElementById(\"destinationfolderinputtextbox\").value='";
-                         ss << EscapeForJavascript(folder) << "';";
-                         this->m_browser->RunScriptAsync(ss.str());
-                     }
-                 });
-
-             folderBrowserDialog->ShowWindowModal();*/
-        }
-        else  if (evt.GetString() == "sourcefolderinputtextbox_clicked")
-        {
-            wxWindowPtr<wxDirDialog> folderBrowserDialog(new wxDirDialog(this, wxEmptyString));
-            folderBrowserDialog->SetPath(wxStandardPaths::Get().GetDocumentsDir());
-
-            folderBrowserDialog->Bind(
-                wxEVT_WINDOW_MODAL_DIALOG_CLOSED,
-                [this, folderBrowserDialog](wxWindowModalDialogEvent& event)
-                {
-                    if (event.GetReturnCode() == wxID_OK)
-                    {
-                        wstring folder = folderBrowserDialog->GetPath().ToStdWstring();
-                        ostringstream ss;
-                        ss << "document.getElementById(\"sourcefolderinputtextbox\").value='";
-                        ss << EscapeForJavascript(folder) << "';";
-                        this->m_browser->RunScriptAsync(ss.str());
-                    }
-                });
-
-            folderBrowserDialog->ShowWindowModal();
-        }
-        //  wxLogMessage("Script message received; value = %s, handler = %s", evt.GetString(), evt.GetMessageHandler());
-    }
-
-    void OnScriptMessage(wxWebViewEvent& evt)
-    {
-        return;
-        //wxUSE_WEBVIEW_EDGE
-    }
-
-    int m_asyncScriptResult;
-    wxString m_asyncScriptString;
-
-    void RunAsyncScript(const wxString& javascript)
-    {
-        m_browser->Bind(wxEVT_WEBVIEW_SCRIPT_RESULT, &WebFrame::OnScriptResult, this);
-        m_asyncScriptResult = -1;
-        m_browser->RunScriptAsync(javascript);
-        while (m_asyncScriptResult == -1)
-            wxYield();
-        m_browser->Unbind(wxEVT_WEBVIEW_SCRIPT_RESULT, &WebFrame::OnScriptResult, this);
-    }
-
-    void OnScriptResult(const wxWebViewEvent& evt)
-    {
-        m_asyncScriptResult = (evt.IsError()) ? 0 : 1;
-        m_asyncScriptString = evt.GetString();
-    }
-
-    string GetSourceFolderTextFieldText()
-    {
-        return this->GetTextOfControl("sourcefolderinputtextbox");
-    }
-
-    string GetDestinationFolderTextFieldText()
-    {
-        return this->GetTextOfControl("destinationfolderinputtextbox");
-    }
-
-    struct RunScriptAsyncResult
-    {
-        volatile bool isDone{ false };
-        std::string result;
-    };
-
-    void GetTextFromControlAndContinueWith(const std::string& ctrlId, std::function<void(std::string&)>& continueWith)
-    {
-
-    }
-
-
-    string GetTextOfControl(const std::string& ctrlId)
-    {
-        ostringstream ss;
-        ss << "function f(){return document.getElementById(\"" << ctrlId << "\").value;}f();";
-        m_browser->Bind(wxEVT_WEBVIEW_SCRIPT_RESULT, &WebFrame::OnAsyncRunScriptEvent, this);
-        RunScriptAsyncResult* result = new RunScriptAsyncResult();
-        this->m_browser->RunScriptAsync(ss.str(), result);
-
-
-        return "";
-        //while (!result->isDone)
-        //{
-        //    wxYield();
-        //}
-
-        //this->m_browser->Unbind(wxEVT_WEBVIEW_SCRIPT_RESULT, &WebFrame::OnAsyncRunScriptEvent, this);
-
-        //string text_of_control = result->result;
-        //delete result;
-        //return text_of_control;
-}
-
-    void OnAsyncRunScriptEvent(const wxWebViewEvent& evt)
-    {
-        RunScriptAsyncResult* result = (RunScriptAsyncResult*)evt.GetClientData();
-
-        result->result = evt.GetString().ToUTF8();
-        result->isDone = true;
-    }
-
-};
-#endif
 
 // ----------------------------------------------------------------------------
 
@@ -526,8 +298,11 @@ public:
     virtual bool OnInit() override
     {
         if (!wxApp::OnInit())
+        {
             return false;
+        }
 
+        /*
         //Required for virtual file system archive and memory support
         wxFileSystem::AddHandler(new wxArchiveFSHandler);
         wxFileSystem::AddHandler(new wxMemoryFSHandler);
@@ -549,8 +324,8 @@ public:
             "</head><body><h1>Page 2</h1>"
             "<p><a href='memory:page1.htm'>Page 1</a> was better.</p></body>");
         wxMemoryFSHandler::AddFile("test.css", "h1 {color: red;}");
-
-        WebFrame* frame = new WebFrame(/*m_url*/);
+        */
+        WebFrame* frame = new WebFrame();
         frame->Show();
         return true;
     }
