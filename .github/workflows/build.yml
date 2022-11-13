@@ -70,7 +70,7 @@ jobs:
             #  note also that the list of packages comes from the file "vcpkg.txt" in the repo
             #vcpkg install --recurse --triplet ${{ matrix.triplet }} $(cat vcpkg.txt) 
             vcpkg install  --triplet ${{ matrix.triplet }} wxwidgets
-            vcpkg install  --triplet ${{ matrix.triplet }} "wxwidgets[webview]" --recurse
+            #vcpkg install  --triplet ${{ matrix.triplet }} "wxwidgets[webview]" --recurse
             echo "all is fine"
           else
             if [ "$RUNNER_OS" == "Linux" ]; then
