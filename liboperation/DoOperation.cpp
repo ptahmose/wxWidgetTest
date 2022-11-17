@@ -25,6 +25,9 @@ void DoOperation::Start(const Parameters& parameters)
         this->worker_thread_.join();
     }
 
+    this->source_folder_ = canonicalize_path(convertUtf8ToWide(parameters.source_folder));
+    this->destination_folder_ = canonicalize_path(convertUtf8ToWide(parameters.destination_folder));
+
     this->file_enumerator_ = make_unique<FileEnumerator>();
     this->file_enumerator_->SetFolder(convertUtf8ToWide(parameters.source_folder), parameters.recursive_folder_traversal);
 
@@ -111,7 +114,11 @@ void DoOperation::ProcessFile(const FileEnumerator::Item& source_file, const std
 
 std::wstring DoOperation::GenerateDestinationFilename(const std::wstring& filename)
 {
-    return L"dest";
+    // determine the "path relative to the source-folder"
+    size_t length_source_path = this->source_folder_.length();
+    wstring relative_to_source_path = filename.substr(length_source_path);
+    wstring destination_path = this->destination_folder_ + relative_to_source_path;
+    return destination_path;
 }
 
 /*static*/std::string DoOperation::GetPercentString(float f)

@@ -16,3 +16,9 @@ std::string convertWideToUtf8(const std::wstring& str)
     std::string conv = utf8_conv.to_bytes(str);
     return conv;
 }
+
+std::wstring canonicalize_path(const std::wstring& path)
+{
+    // TODO...
+    return path;
+}
