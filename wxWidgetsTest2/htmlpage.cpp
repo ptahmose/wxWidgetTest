@@ -133,7 +133,7 @@ const char* html_page = R"_(
         </div>
         <div>
             <button type="button" id="startbutton" onclick="window.wx_msg.postMessage({'id':'startbutton','arg':get_options()});"> Start</button>
-            <button type="button" id="stopbutton" disabled onclick="window.wx_msg.postMessage({'id':'stopbutton','arg':none});"> Stop</button>
+            <button type="button" id="stopbutton" disabled onclick="window.wx_msg.postMessage({'id':'stopbutton','arg':undefined});"> Stop</button>
         </div>
         <div>
             <table class="StatisticsTable">

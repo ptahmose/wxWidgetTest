@@ -1,6 +1,7 @@
 #pragma once
 
 #include <wx/webview.h>
+#include "customEvents.h"
 #include <rapidjson/document.h>
 #include <DoOperation.h>
 
@@ -8,6 +9,7 @@ class WebFrame : public wxFrame
 {
 private:
     static constexpr int PROGRESS_EVENT_ID = 100000;
+    static constexpr int BROWSEFORFOLDER_EVENT_ID = 100001;
 
     wxWebView* web_view_;
 
@@ -33,7 +35,9 @@ private:
     static bool TryParseJson(const rapidjson::Document& json_document, DoOperation::Parameters& operation_parameters);
 
     void ProgressEvent(const DoOperation::ProgressInformation& information);
-    void OnProgressEvent(wxCommandEvent& event);
+
+    void OnProgressInfoEvent(OperationProgressInfoEvent& event);
+    void OnBrowseForFolderEvent(BrowseForFolderEvent& event);
 
     /*Test*/
     void ButtonOneClicked(wxCommandEvent& event);

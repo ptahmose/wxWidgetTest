@@ -13,7 +13,6 @@
 #include <algorithm>
 #include "webView.h"
 
-#include "wxProgressInfoClientData.h"
 #include "htmlpage.h"
 #include "utilities.h"
 #include "wxlogo.xpm"
@@ -52,15 +51,17 @@ WebFrame::WebFrame() : wxFrame(nullptr, wxID_ANY, "wxWidget-WebView Demo")
 
     this->Bind(wxEVT_WEBVIEW_SCRIPT_MESSAGE_RECEIVED, &WebFrame::OnScriptWxMsg, this, this->web_view_->GetId());
 
+    /*
     // add a button below the web-control (for testing)
     wxButton* button = new wxButton(this, wxID_ANY, "Test", wxDefaultPosition, wxDefaultSize, wxBU_EXACTFIT);
     topsizer->Add(button, wxSizerFlags(1).Align(wxALIGN_CENTER_HORIZONTAL).Border(wxALL, 1).Proportion(0));
     button->Bind(wxEVT_BUTTON, &WebFrame::ButtonOneClicked, this);
+    */
 }
 
 void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 {
-    string message = string{evt.GetString().ToUTF8()};
+    string message = string{ evt.GetString().ToUTF8() };
     rapidjson::Document document;
     document.Parse<0>(message.c_str());
     if (!document.HasParseError())
@@ -77,15 +78,19 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
             arg = document["arg"].GetString();
         }
 
-        if (id == "sourcefolderinputtextbox")
+        if (id == "sourcefolderinputtextbox" || id == "destinationfolderinputtextbox")
         {
             // the "browse-button" of the "source-folder-selection" has been clicked
-            this->ChooseFolderAndSetInWebsite(id, arg);
-        }
-        else if (id == "destinationfolderinputtextbox")
-        {
-            // the "browse-button" of the "destination-folder-selection" has been clicked
-            this->ChooseFolderAndSetInWebsite(id, arg);
+            BrowseForFolderEvent event(BROWSEFORFOLDER_EVENT_TYPE, BROWSEFORFOLDER_EVENT_ID);
+            event.SetHtmlElementId(id);
+            event.SetCurrentFolder(arg);
+
+            // Note: Maybe it is not really required, but here we just put an event (or: a custom event) into the
+            //        event-queue. It works without this detour, but there are ominous warnings being emitted 
+            //        (by WebView2 on Windows), warning about re-entrancy issues. The browse-for-folder-dialog of
+            //        course is running its own message-pump, maybe this is asking for trouble. So - we try to play
+            //        nice and go with the message-queue.
+            wxPostEvent(this, event);
         }
         else if (id == "startbutton")
         {
@@ -155,25 +160,19 @@ void WebFrame::OnScriptWxMsg(wxWebViewEvent& evt)
 void WebFrame::ProgressEvent(const DoOperation::ProgressInformation& information)
 {
     // Note that this method is called from an arbitrary thread context
-    wxCommandEvent* event = new  wxCommandEvent(wxEVT_PROGRESS_EVENT, PROGRESS_EVENT_ID);
-    event->SetClientObject(new wxProgressInfoClientData(information));
+    auto event = new OperationProgressInfoEvent(OPERATIONPROGRESSINFO_EVENT_TYPE, PROGRESS_EVENT_ID);
+    event->SetProgressInformation(information);
 
-    // The event-queue will take ownership of the event-object.
-    // However - note that nobody seems to delete the "client-object", the command-object does not
-    //  seem do this. This is kind of fishy. It would maybe more prudent if we would maintain our own
-    //  queue here, and use the event just to notify the UI-thread.
-    this->GetEventHandler()->QueueEvent(event);
+    // The event-queue will take ownership of the event-object. Note that there is no pre-caution for dealing
+    //  with an event-flood - so we rely on that the rate this event is raised is reasonable.
+    wxQueueEvent(this, event);
 }
 
-void WebFrame::OnProgressEvent(wxCommandEvent& event)
+void WebFrame::OnProgressInfoEvent(OperationProgressInfoEvent& event)
 {
-    // get the number sent along with the event and use it to update the GUI
-    const wxProgressInfoClientData* progress_info_client_data = dynamic_cast<wxProgressInfoClientData*>(event.GetClientObject());
-
-    const auto& progress_info = progress_info_client_data->GetProgressInformation();
-
     ostringstream javascript_command;   // in this stringstream we construct the code to execute "in" the website
 
+    const auto& progress_info = event.GetProgressInformation();
     if (progress_info.message_valid)
     {
         javascript_command << "add_to_log(" << progress_info.remove_characters_before_adding_message << ",\"" << EscapeForJavascript(convertUtf8ToWide(progress_info.message)) << "\");";
@@ -210,10 +209,11 @@ void WebFrame::OnProgressEvent(wxCommandEvent& event)
         javascript_command << "set_operational_state(" << (progress_info.operation_ongoing ? "true" : "false") << ");";
         this->web_view_->RunScriptAsync(javascript_command.str());
     }
+}
 
-    // this is quite fishy, see comment when adding the event
-    event.SetClientObject(nullptr);
-    delete progress_info_client_data;
+void WebFrame::OnBrowseForFolderEvent(BrowseForFolderEvent& event)
+{
+    this->ChooseFolderAndSetInWebsite(event.GetHtmlElementId(), event.GetCurrentFolder());
 }
 
 void WebFrame::ChooseFolderAndSetInWebsite(const std::string& id, const std::string& current_folder)
@@ -284,13 +284,9 @@ void WebFrame::ButtonOneClicked(wxCommandEvent& event)
 }
 
 wxBEGIN_EVENT_TABLE(WebFrame, wxFrame)
-//EVT_BUTTON(Frame::Ids::ChooseSourceFolderButton, Frame::OnChooseSourceFolderButton)
-//EVT_BUTTON(Frame::Ids::ChooseDestinationFolderButton, Frame::OnChooseDestinationFolderButton)
-//EVT_BUTTON(Frame::Ids::StartButton, Frame::OnStartButton)
-//EVT_BUTTON(Frame::Ids::StopButton, Frame::OnStopButton)
-EVT_COMMAND(WebFrame::PROGRESS_EVENT_ID, wxEVT_PROGRESS_EVENT, WebFrame::OnProgressEvent)
+EVT_BROWSEFORFOLDER(WebFrame::BROWSEFORFOLDER_EVENT_ID, WebFrame::OnBrowseForFolderEvent)
+EVT_OPERATIONPROGRESSINFO(WebFrame::PROGRESS_EVENT_ID, WebFrame::OnProgressInfoEvent)
 wxEND_EVENT_TABLE()
-
 
 // ----------------------------------------------------------------------------
 
