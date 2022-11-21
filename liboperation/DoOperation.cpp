@@ -29,7 +29,7 @@ void DoOperation::Start(const Parameters& parameters)
     this->destination_folder_ = canonicalize_path(convertUtf8ToWide(parameters.destination_folder));
 
     this->file_enumerator_ = make_unique<FileEnumerator>();
-    this->file_enumerator_->SetFolder(convertUtf8ToWide(parameters.source_folder), parameters.recursive_folder_traversal);
+    this->file_enumerator_->SetFolder(this->source_folder_.generic_wstring(), parameters.recursive_folder_traversal);
 
     this->cancellation_requested_.store(false);
     this->total_number_of_files_processed_ = 0;
@@ -62,7 +62,7 @@ void DoOperation::RunOperation()
             break;
         }
 
-        wstring destination_file = this->GenerateDestinationFilename(item.filename_wide);
+        auto destination_file = this->DetermineDestinationFilename(item.filename_wide);
 
         this->ProcessFile(item, destination_file);
 
@@ -78,23 +78,29 @@ void DoOperation::RunOperation()
     }
 }
 
-void DoOperation::ProcessFile(const FileEnumerator::Item& source_file, const std::wstring& destination_file)
+void DoOperation::ProcessFile(const FileEnumerator::Item& source_file, const std::filesystem::path& destination_file)
 {
     uint32_t characters_to_go_back;
     string percent_done = DoOperation::GetPercentString(0);
     characters_to_go_back = static_cast<uint32_t>(percent_done.size());
 
+    // for display purposes, convert the "generic path representations" into the "preferred format",
+    //  i.e. on Windows use backslashes
+    filesystem::path destination_file_preferred = filesystem::path(destination_file).make_preferred();
+    filesystem::path source_file_preferred = filesystem::path(source_file.filename_wide).make_preferred();
+
     ProgressInformation progress_information;
     ostringstream ss;
-    ss << source_file.filename_utf8 << " - " << percent_done;
+    ss << source_file_preferred.u8string() << " -> " << destination_file_preferred.u8string() << " : " << percent_done;
 
     progress_information.message = ss.str();
     progress_information.message_valid = true;
     this->parameters_.report_progress_functor(progress_information);
 
+    // TODO: here we would not do the processing...
     for (float f = 0; f <= 100; f += 9.3f)
     {
-        this_thread::sleep_for(std::chrono::milliseconds(500));
+        this_thread::sleep_for(std::chrono::milliseconds(100));
 
         percent_done = DoOperation::GetPercentString(f);
         progress_information.message = percent_done;
@@ -112,13 +118,13 @@ void DoOperation::ProcessFile(const FileEnumerator::Item& source_file, const std
     this->parameters_.report_progress_functor(progress_information);
 }
 
-std::wstring DoOperation::GenerateDestinationFilename(const std::wstring& filename)
+std::filesystem::path DoOperation::DetermineDestinationFilename(const std::wstring& filename)
 {
-    // determine the "path relative to the source-folder"
-    size_t length_source_path = this->source_folder_.length();
-    wstring relative_to_source_path = filename.substr(length_source_path);
-    wstring destination_path = this->destination_folder_ + relative_to_source_path;
-    return destination_path;
+    const filesystem::path dest_filename_path(filename);
+    const filesystem::path rel_filename = dest_filename_path.lexically_relative(this->source_folder_);
+    filesystem::path dest_filename{ this->destination_folder_ };
+    dest_filename /= rel_filename;
+    return dest_filename.generic_wstring();
 }
 
 /*static*/std::string DoOperation::GetPercentString(float f)

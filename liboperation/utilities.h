@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <filesystem>
 
 std::wstring convertUtf8ToWide(const std::string& str);
 std::string convertWideToUtf8(const std::wstring& str);
@@ -11,4 +12,4 @@ std::string convertWideToUtf8(const std::wstring& str);
 /// \param  path    Full pathname (i.e. a "folder path")
 ///
 /// \returns    The "canonicalized" path.
-std::wstring canonicalize_path(const std::wstring& path);
+std::filesystem::path canonicalize_path(const std::wstring& path);

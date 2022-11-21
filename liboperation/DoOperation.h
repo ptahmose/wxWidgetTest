@@ -4,6 +4,7 @@
 #include <string>
 #include <thread>
 #include <atomic>
+#include <filesystem>
 
 #include "compressionOptions.h"
 #include "FileEnumerator.h"
@@ -69,8 +70,8 @@ private:
     std::thread worker_thread_;
     std::atomic_bool cancellation_requested_{ false };
 
-    std::wstring source_folder_;
-    std::wstring destination_folder_;
+    std::filesystem::path source_folder_;
+    std::filesystem::path destination_folder_;
     Parameters parameters_;
 
     std::unique_ptr<FileEnumerator> file_enumerator_;
@@ -80,8 +81,15 @@ private:
 
 private:
     void RunOperation();
-    std::wstring GenerateDestinationFilename(const std::wstring& filename);
-    void ProcessFile(const FileEnumerator::Item& source_file, const std::wstring& destination_file);
+
+    /// Determine the destination filename - i.e. we assume that the specified filename is
+    /// beneath the "source_folder_", and we determine the relative path to "source_folder_",
+    /// and then concatenate "destination_folder_" with this relative path.
+    /// \param  filename    Filename of the source file.
+    /// \returns    The path of the destination file.
+    std::filesystem::path DetermineDestinationFilename(const std::wstring& filename);
+
+    void ProcessFile(const FileEnumerator::Item& source_file, const std::filesystem::path& destination_file);
     void NotifyCancelled();
     void NotifyCompleted();
 
