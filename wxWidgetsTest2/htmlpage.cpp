@@ -61,7 +61,10 @@ const char* html_page = R"_(
 
         function add_to_log(characters_to_delete, text) {
             if (characters_to_delete == 0) {
-                document.getElementById('logtextbox').value += text;
+                var textarea = document.getElementById('logtextbox');
+                textarea .value += text;
+                // scroll the text-area to the bottom
+                textarea.scrollTop = textarea.scrollHeight;
             }
             else {
                 var t = document.getElementById('logtextbox').value;
