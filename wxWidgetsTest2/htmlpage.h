@@ -1,4 +1,4 @@
 #pragma once
+#include <string>
 
-
-extern const char* html_page;
+std::string GetHtmlPage();

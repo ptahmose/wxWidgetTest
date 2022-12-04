@@ -1,5 +1,22 @@
 #include "htmlpage.h"
 
+#include <iostream>
+#include <cmrc/cmrc.hpp>
+
+CMRC_DECLARE(cmrc_resource);
+
+using namespace std;
+
+std::string GetHtmlPage()
+{
+    auto fs = cmrc::cmrc_resource::get_filesystem();
+    
+    const auto page_file = fs.open("page.html");
+    auto text = string(page_file.begin(), page_file.end());
+    return text;
+}
+
+#if 0
 const char* html_page = R"_(
 
 
@@ -170,3 +187,4 @@ const char* html_page = R"_(
 
 
 )_";
+#endif

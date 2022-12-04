@@ -25,7 +25,7 @@ WebFrame::WebFrame() : wxFrame(nullptr, wxID_ANY, "wxWidget-WebView Demo")
     this->SetSizer(topsizer);
     if (wxWebView::IsBackendAvailable(wxWebViewBackendEdge))
     {
-        this->web_view_ = wxWebView::New(wxWebViewBackendEdge);
+        this->web_view_ = wxWebView::New(/*wxWebViewBackendIE*/ wxWebViewBackendEdge);
     }
     else if (wxWebView::IsBackendAvailable(wxWebViewBackendWebKit))
     {
@@ -39,9 +39,10 @@ WebFrame::WebFrame() : wxFrame(nullptr, wxID_ANY, "wxWidget-WebView Demo")
     this->web_view_->Create(this, Ids::WebView, "", wxDefaultPosition, wxDefaultSize);
     //this->web_view_ = new wxWebViewEdge(this, wxID_ANY, "", wxDefaultPosition, wxDefaultSize);
     topsizer->Add(this->web_view_, wxSizerFlags().Expand().Proportion(1));
-    this->web_view_->SetPage(
-        html_page,
-        "");
+    //this->web_view_->LoadURL("file:///D:/dev/MyGitHub/wxWidgetTest/wxWidgetsTest2/page.html");
+
+    wxString str = GetHtmlPage();
+    this->web_view_->SetPage(str, "");
 
     // this will allow to call from Javascript into this class (c.f. https://docs.wxwidgets.org/trunk/classwx_web_view.html#a2597c3371ed654bf03262ec6d34a0126)
     if (!this->web_view_->AddScriptMessageHandler("wx_msg"))
